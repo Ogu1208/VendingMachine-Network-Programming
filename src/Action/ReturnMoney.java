@@ -40,10 +40,6 @@ public class ReturnMoney implements ActionListener {
 		int remainingMoney = returnMoney;
 
 		if (returnMoney > 0) {  // 반환할 돈이 있으면
-			// 총 매출액에서 반환금을 빼고 RightPanel에서 총 매출액 text 다시 설정
-			Admin.setTotalMoney(Admin.getTotalMoney() - totalReturnMoney);
-			MachinePanelRight.totalMoneyLabel.setText("총 매출액 : " + Admin.getTotalMoney());
-
 			// 현재 투입된 금액을 0으로 설정
 			takeMoneytext.setText("0");
 
@@ -83,16 +79,19 @@ public class ReturnMoney implements ActionListener {
 				}
 			}
 
+			int successfullyReturned = totalReturnMoney - remainingMoney;
+			Admin.setTotalMoney(Admin.getTotalMoney() - successfullyReturned); // 매출액에서 반환된 금액을 차감
+			MachinePanelRight.totalMoneyLabel.setText("총 매출액 : " + Admin.getTotalMoney());
+
 			if (remainingMoney > 0) {
-				JOptionPane.showMessageDialog(new JFrame(), "거스름돈이 부족하여 일부만 반환되었습니다. 반환된 금액: " + (totalReturnMoney - remainingMoney) + "원");
+				JOptionPane.showMessageDialog(new JFrame(), "거스름돈이 부족하여 일부만 반환되었습니다. 자판기 옆 번호로 전화 부탁드립니다.\n 반환된 금액: " + successfullyReturned + "원");
 			} else {
 				JOptionPane.showMessageDialog(new JFrame(), "반환된 금액: " + totalReturnMoney + "원");
 			}
 
 			// 지폐 투입 총합 초기화
 			BillButtonAction.resetTotalBillAmount();
-		}
-		else {
+		} else {
 			JOptionPane.showMessageDialog(new JFrame(), "반환할 돈이 없습니다.");
 		}
 	}
@@ -106,4 +105,3 @@ public class ReturnMoney implements ActionListener {
 		}
 	}
 }
-
