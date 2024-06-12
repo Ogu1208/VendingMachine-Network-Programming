@@ -39,8 +39,9 @@ public class CoinButtonAction implements ActionListener {
         // Add the coin to CoinArray
         addCoinToCoinArray(coinValue);
 
-        // Update the coin table in the right panel
+        // Update the coin table and total balance in the right panel
         updateCoinTable();
+        MachinePanelRight.updateTotalBalanceLabel();
 
         updateButtonColors(currentMoney);
     }

@@ -140,7 +140,7 @@ public class MachinePanelLeft extends JPanel {
 		}
 	}
 
-	public void updateCanButton() {
+	public void updateCanButtons() {
 		for (int i = 0; i < blist.size(); i++) {
 			JButton button = blist.get(i);
 			String canName = CanArray.canList.get(i).getCanName();

@@ -15,6 +15,7 @@ import javax.swing.table.DefaultTableModel;
 
 import Can.CanArray;
 import Coin.CoinArray;
+import Coin.Coin;
 import Machine.MachinePanelRight;
 import Person.Admin;
 
@@ -34,43 +35,60 @@ public class ReturnMoney implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-
 		int returnMoney = Integer.parseInt(takeMoneytext.getText());
-		int totalReturnMoney = returnMoney; // 실제로 반환된 금액을 저장
-		int remainingMoney = returnMoney;
+		int originalReturnMoney = returnMoney; // 원래 반환해야 할 금액을 저장
+
+		// 반환 동전 목록들
+		int return500 = 0;
+		int return100 = 0;
+		int return50 = 0;
 
 		if (returnMoney > 0) {  // 반환할 돈이 있으면
-			// 현재 투입된 금액을 0으로 설정
-			takeMoneytext.setText("0");
+			return500 = returnMoney / 500;
+			return100 = (returnMoney % 500) / 100;
+			return50 = ((returnMoney % 500) % 100) / 50;
 
-			// 반환 동전 목록들 (지폐 제외)
-			int[] coinValues = {500, 100, 50, 10};
-			int[] returnCoins = new int[coinValues.length];
-
-			// 각 동전의 개수를 고려하여 반환
-			for (int i = 0; i < coinValues.length; i++) {
-				for (int j = 0; j < CoinArray.coinList.size(); j++) {
-					if (CoinArray.coinList.get(j).getCoinName().equals(String.valueOf(coinValues[i]))) {
-						int availableCoins = CoinArray.coinList.get(j).getCoinNum();
-						int neededCoins = remainingMoney / coinValues[i];
-						int coinsToReturn = Math.min(availableCoins, neededCoins);
-						returnCoins[i] = coinsToReturn;
-						remainingMoney -= coinsToReturn * coinValues[i];
-					}
+			for (int i = 0; i < return500; i++) {
+				if (CoinArray.coinList.get(1).getCoinNum() == 0) {
+					JOptionPane.showMessageDialog(new JFrame(), "500원 동전 부족");
+					return100 = returnMoney / 100;
+					break;
+				} else {
+					CoinArray.coinList.get(1).setCoinNum(CoinArray.coinList.get(1).getCoinNum() - 1);
+					returnMoney -= 500;
+					takeMoneytext.setText(Integer.toString(returnMoney));
+				}
+			}
+			for (int i = 0; i < return100; i++) {
+				if (CoinArray.coinList.get(2).getCoinNum() == 0) {
+					JOptionPane.showMessageDialog(new JFrame(), "100원 동전 부족");
+					return50 = returnMoney / 50;
+					break;
+				} else {
+					CoinArray.coinList.get(2).setCoinNum(CoinArray.coinList.get(2).getCoinNum() - 1);
+					returnMoney -= 100;
+					takeMoneytext.setText(Integer.toString(returnMoney));
+				}
+			}
+			for (int i = 0; i < return50; i++) {
+				if (CoinArray.coinList.get(3).getCoinNum() == 0) {
+					JOptionPane.showMessageDialog(new JFrame(), "동전 부족");
+					takeMoneytext.setText(Integer.toString(returnMoney));
+					break;
+				} else {
+					CoinArray.coinList.get(3).setCoinNum(CoinArray.coinList.get(3).getCoinNum() - 1);
+					returnMoney -= 50;
+					takeMoneytext.setText(Integer.toString(returnMoney));
 				}
 			}
 
-			// CoinArray에서 동전 개수 차감
-			for (int i = 0; i < coinValues.length; i++) {
-				for (int j = 0; j < CoinArray.coinList.size(); j++) {
-					if (CoinArray.coinList.get(j).getCoinName().equals(String.valueOf(coinValues[i]))) {
-						CoinArray.coinList.get(j).setCoinNum(CoinArray.coinList.get(j).getCoinNum() - returnCoins[i]);
-					}
-				}
+			DefaultTableModel moneyModel = (DefaultTableModel) MachinePanelRight.moneyTable.getModel();
+			moneyModel.setRowCount(0);
+			for (int j = 0; j < CoinArray.coinList.size(); j++) {
+				String arr[] = {CoinArray.coinList.get(j).getCoinName(),
+						Integer.toString(CoinArray.coinList.get(j).getCoinNum())};
+				moneyModel.addRow(arr);
 			}
-
-			// moneyTable 업데이트
-			updateMoneyTable();
 
 			for (int k = 0; k < blist.size(); k++) {
 				if (blist.get(k).getLabel().equals(CanArray.canList.get(k).getCanName())) {
@@ -79,29 +97,17 @@ public class ReturnMoney implements ActionListener {
 				}
 			}
 
-			int successfullyReturned = totalReturnMoney - remainingMoney;
-			Admin.setTotalMoney(Admin.getTotalMoney() - successfullyReturned); // 매출액에서 반환된 금액을 차감
-			MachinePanelRight.totalMoneyLabel.setText("총 매출액 : " + Admin.getTotalMoney());
+			// 자판기 총 잔고 라벨 업데이트
+			MachinePanelRight.updateTotalBalanceLabel();
 
-			if (remainingMoney > 0) {
-				JOptionPane.showMessageDialog(new JFrame(), "거스름돈이 부족하여 일부만 반환되었습니다. 자판기 옆 번호로 전화 부탁드립니다.\n 반환된 금액: " + successfullyReturned + "원");
-			} else {
-				JOptionPane.showMessageDialog(new JFrame(), "반환된 금액: " + totalReturnMoney + "원");
-			}
+			// 총 매출액 업데이트
+			int newTotalMoney = Admin.getTotalMoney() - (originalReturnMoney - returnMoney);
+			Admin.setTotalMoney(newTotalMoney);
+			MachinePanelRight.totalMoneyLabel.setText("총 매출액 : " + newTotalMoney);
 
-			// 지폐 투입 총합 초기화
-			BillButtonAction.resetTotalBillAmount();
+			JOptionPane.showMessageDialog(new JFrame(), "반환된 금액: " + (originalReturnMoney - returnMoney) + "원");
 		} else {
-			JOptionPane.showMessageDialog(new JFrame(), "반환할 돈이 없습니다.");
-		}
-	}
-
-	private void updateMoneyTable() {
-		DefaultTableModel moneyModel = (DefaultTableModel) MachinePanelRight.moneyTable.getModel();
-		moneyModel.setRowCount(0);
-		for (int j = 0; j < CoinArray.coinList.size(); j++) {
-			String arr[] = { CoinArray.coinList.get(j).getCoinName(), Integer.toString(CoinArray.coinList.get(j).getCoinNum()) };
-			moneyModel.addRow(arr);
+			JOptionPane.showMessageDialog(new JFrame(), "반환할 돈이없습니다.");
 		}
 	}
 }
