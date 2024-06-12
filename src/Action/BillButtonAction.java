@@ -47,7 +47,7 @@ public class BillButtonAction implements ActionListener {
         // Add the bill to CoinArray
         addCoinToCoinArray(billValue);
 
-        // Update the coin table and total balance in the right panel
+        // Update the coin table in the right panel
         updateCoinTable();
         MachinePanelRight.updateTotalBalanceLabel();
 
@@ -67,7 +67,7 @@ public class BillButtonAction implements ActionListener {
         DefaultTableModel moneyModel = (DefaultTableModel) MachinePanelRight.moneyTable.getModel();
         moneyModel.setRowCount(0);
         for (Coin coin : CoinArray.coinList) {
-            String[] row = { coin.getCoinName(), String.valueOf(coin.getCoinNum()) };
+            String[] row = {coin.getCoinName(), String.valueOf(coin.getCoinNum())};
             moneyModel.addRow(row);
         }
     }

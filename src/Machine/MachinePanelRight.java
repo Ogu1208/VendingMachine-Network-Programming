@@ -33,40 +33,37 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 	JButton btnAdminIn, btnAddCanStart, btnAddCan;
 	JLabel label;
 	String password;
-	DefaultTableModel canModel;
+	DefaultTableModel canModel, moneyModel;
 	public static JLabel totalMoneyLabel, PWLabel, collectLabel, totalBalanceLabel;
 	public static JTable canTable, moneyTable;
-	MachinePanelLeft panelLeft;  // 추가: 왼쪽 패널 참조
+	MachinePanelLeft panelLeft;
 
-	public MachinePanelRight(String password, MachinePanelLeft panelLeft) {  // 수정: 생성자에 MachinePanelLeft 추가
-		// 우측 관리자 판넬
+	public MachinePanelRight(String password, MachinePanelLeft panelLeft) {
 		this.password = password;
 		this.panelLeft = panelLeft;
 
-		setPreferredSize(new Dimension(280, 630)); // 윈도우창 크기 설정
+		setPreferredSize(new Dimension(280, 630));
 
-		label = new JLabel("관리자모드 - 비밀번호를 입력해주세요");  // 우측판넬 기본값
-		label.setVisible(true);  // visible true로 초기화
+		label = new JLabel("관리자모드 - 비밀번호를 입력해주세요");
+		label.setVisible(true);
 
 		// ------------ <음료재고 관리 판넬> ------------ //
 		canAdminPanel = new JPanel(new BorderLayout());
 
-		String[] canColName = {"음료이름", "재고", "개당 판매가격"};  // 테이블 목록
-		canModel = new DefaultTableModel(canColName, 0); // JTable의 목록을 수정
-		canTable = new JTable(canModel);  // JTable
-		JScrollPane canScrollPanel = new JScrollPane(canTable);  // 스크롤
+		String[] canColName = {"음료이름", "재고", "개당 판매가격"};
+		canModel = new DefaultTableModel(canColName, 0);
+		canTable = new JTable(canModel);
+		JScrollPane canScrollPanel = new JScrollPane(canTable);
 		canScrollPanel.setPreferredSize(new Dimension(230, 150));
 
-		btnAddCan = new JButton("음료추가");  // 음료추가 버튼
-		btnAddCan.addActionListener(new AddCanFrame(canTable));  // 음료추가 버튼 액션
+		btnAddCan = new JButton("음료추가");
+		btnAddCan.addActionListener(new AddCanFrame(canTable));
 
-		// 음료재고 관리 판넬 레이아웃 위치 설정
 		canAdminPanel.add(new JLabel("음료관리"), BorderLayout.WEST);
 		canAdminPanel.add(btnAddCan, BorderLayout.EAST);
 		canAdminPanel.add(canScrollPanel, BorderLayout.SOUTH);
-		canAdminPanel.setVisible(false);  // 기본값은 안보임
+		canAdminPanel.setVisible(false);
 
-		// 음료이름|재고|개당판매가격 표 출력
 		for (int i = 0; i < CanArray.canList.size(); i++) {
 			String arr[] = {CanArray.canList.get(i).getCanName(),
 					Integer.toString(CanArray.canList.get(i).getCanNum()),
@@ -77,24 +74,22 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		// ------------ <잔돈 관리 판넬> ------------ //
 		moneyAdminPanel = new JPanel(new BorderLayout());
 
-		String[] moneyColName = {"동전 종류", "남은 갯수",};// 테이블 목록
-		DefaultTableModel moneyModel = new DefaultTableModel(moneyColName, 0);// JTable의 목록을 수정
+		String[] moneyColName = {"동전 종류", "남은 갯수",};
+		moneyModel = new DefaultTableModel(moneyColName, 0);
 		moneyTable = new JTable(moneyModel);
-		JScrollPane moneyScrollPanel = new JScrollPane(moneyTable); // 스크롤
+		JScrollPane moneyScrollPanel = new JScrollPane(moneyTable);
 		moneyScrollPanel.setPreferredSize(new Dimension(230, 150));
 
-		JButton btnAddMoney = new JButton("잔돈추가"); // 잔돈추가 버튼
-		btnAddMoney.addActionListener(new AddCoinFrame(moneyTable));  // 잔돈추가 버튼 액션
+		JButton btnAddMoney = new JButton("잔돈추가");
+		btnAddMoney.addActionListener(new AddCoinFrame(moneyTable));
 
-		// 잔돈 관리 판넬 레이아웃 설정
 		moneyAdminPanel.add(new JLabel("잔돈관리"), BorderLayout.CENTER);
 		moneyAdminPanel.add(btnAddMoney, BorderLayout.EAST);
 		moneyAdminPanel.add(moneyScrollPanel, BorderLayout.SOUTH);
-		moneyAdminPanel.setVisible(false);   // 기본값은 안보임
+		moneyAdminPanel.setVisible(false);
 
 		moneyModel = (DefaultTableModel) moneyTable.getModel();
 
-		// 동전 종류 | 남은 갯수 출력
 		for (int i = 0; i < CoinArray.coinList.size(); i++) {
 			String arr[] = {CoinArray.coinList.get(i).getCoinName(),
 					Integer.toString(CoinArray.coinList.get(i).getCoinNum())};
@@ -110,69 +105,65 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		totalBalanceLabel = new JLabel("자판기 총 잔고 : " + calculateTotalBalance());
 		moneyTotalPanel.add(totalBalanceLabel, BorderLayout.SOUTH);
 
-		moneyTotalPanel.setVisible(false);  // 기본값은 안보임
+		moneyTotalPanel.setVisible(false);
 
 		// ------------ <비밀번호 변경 판넬> ----------- //
-		PWPanel = new JPanel(new BorderLayout());  // 전체 판넬
+		PWPanel = new JPanel(new BorderLayout());
 
-		JPanel PW1 = new JPanel();  // 안내문 판넬
-		JPanel PW2 = new JPanel();  // 입력부분 판넬
-		PWLabel = new JLabel("(특수문자 및 숫자 하나 이상 포함, 8자리 이상)");  // 안내 라벨
-		changePW = new JTextField(10);  // 비밀번호 입력 JTextField(수정가능)
-		changePW.setText("ex) Ogu1208!");  // 예시 설정
-		//changePW.setEditable(true);
+		JPanel PW1 = new JPanel();
+		JPanel PW2 = new JPanel();
+		PWLabel = new JLabel("(특수문자 및 숫자 하나 이상 포함, 8자리 이상)");
+		changePW = new JTextField(10);
+		changePW.setText("ex) Ogu1208!");
 		JButton PWButton = new JButton("비밀번호 변경");
 
-		changePW.addActionListener(new ActionPwChange(changePW));  // 입력텍스트필드 액션
-		PWButton.addActionListener(new ActionPwChange(changePW));  // 비밀번호 변경 버튼 액션
+		changePW.addActionListener(new ActionPwChange(changePW));
+		PWButton.addActionListener(new ActionPwChange(changePW));
 
-		PW1.add(PWLabel);  // PW1은 안내
-		PW2.add(changePW);  //PW2는 변경부분
+		PW1.add(PWLabel);
+		PW2.add(changePW);
 		PW2.add(PWButton);
 
-		// 비밀번호 변경 판넬 레이아웃 설정
 		PWPanel.add(PW2, BorderLayout.NORTH);
 		PWPanel.add(PW1, BorderLayout.SOUTH);
 
-		PWPanel.setVisible(false);  // 기본값은 안보임
+		PWPanel.setVisible(false);
 
 		// ------------ <수금 판넬> ----------- //
-		collectPanel = new JPanel(new BorderLayout()); // 전체 판넬
+		collectPanel = new JPanel(new BorderLayout());
 
-		JPanel collect1 = new JPanel(); // 안내문 판넬
-		JPanel collect2 = new JPanel(); // 입력부분 판넬
+		JPanel collect1 = new JPanel();
+		JPanel collect2 = new JPanel();
 		collectLabel = new JLabel("수금할 금액을 입력하세요(원)");
 		collectMoney = new JTextField(10);
-		//changePW.setEditable(true);
 		JButton collectButton = new JButton("수금");
 
-		collectMoney.addActionListener(new ActionCollectMoney(collectMoney)); // 입력텍스트필드 액션
-		collectButton.addActionListener(new ActionCollectMoney(collectMoney)); // 수금 버튼 액션
+		collectMoney.addActionListener(new ActionCollectMoney(collectMoney));
+		collectButton.addActionListener(new ActionCollectMoney(collectMoney));
 
-		collect1.add(collectLabel); // collect1은 안내
-		collect2.add(collectMoney); // collect2는 수금
+		collect1.add(collectLabel);
+		collect2.add(collectMoney);
 		collect2.add(collectButton);
 
 		// 레이아웃 설정
 		collectPanel.add(collect2, BorderLayout.NORTH);
 		collectPanel.add(collect1, BorderLayout.SOUTH);
 
-		collectPanel.setVisible(false); // 기본값은 안보임
+		collectPanel.setVisible(false);
 
 		// ------------ <관리자 접속 판넬> ----------- //
-		JPanel inAdminPanel = new JPanel();  // 큰 틀
+		JPanel inAdminPanel = new JPanel();
 
-		adminPass = new JTextField(10);  // 비밀번호 텍스트field
+		adminPass = new JTextField(10);
 		btnAdminIn = new JButton("접속");
-		adminPass.addActionListener(this);  // 비밀번호 텍스트field dortus
+		adminPass.addActionListener(this);
 
-		btnAdminIn.addActionListener(this);  // 접속 버튼 액션
+		btnAdminIn.addActionListener(this);
 
 		inAdminPanel.add(new JLabel("관리자"));
 		inAdminPanel.add(adminPass);
 		inAdminPanel.add(btnAdminIn);
 
-		// 관리자 판넬에 각 판넬들 추가
 		add(inAdminPanel);
 		add(canAdminPanel);
 		add(label);
@@ -180,16 +171,15 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		add(moneyTotalPanel);
 		add(PWPanel);
 		add(collectPanel);
+
+		addTableModelListeners();
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// 관리자 접속 비밀번호확인
-		if (!canAdminPanel.isVisible()) {  // canAdminPanel이 보이지 않을 경우(많은 것들 중 canAdminpanel을 기준으로 함)
-			if (adminPass.getText().equals(Admin.password)) {  // 비밀번호가 일치할 경우
-
+		if (!canAdminPanel.isVisible()) {
+			if (adminPass.getText().equals(Admin.password)) {
 				label.setVisible(false);
-				// 안보였던 판넬들 보이도록 변경
 				canAdminPanel.setVisible(true);
 				moneyAdminPanel.setVisible(true);
 				moneyTotalPanel.setVisible(true);
@@ -200,14 +190,12 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 				adminPass.setText("");
 				adminPass.setVisible(false);
 
-			} else if (adminPass.getText().equals("")) {  // 비밀번호를 입력하지 않았을 경우
+			} else if (adminPass.getText().equals("")) {
 				JOptionPane.showMessageDialog(new JFrame(), "비밀번호를 입력해주세요");
-			} else {  // 비밀번호가 틀렸을 경우
+			} else {
 				JOptionPane.showMessageDialog(new JFrame(), "비밀번호가 틀렸습니다!");
 			}
-		} else if (canAdminPanel.isVisible()) { // canAdminPanel이 보일 경우
-
-			// 각 판넬들을 보이지 않도록 변경
+		} else if (canAdminPanel.isVisible()) {
 			label.setVisible(true);
 			canAdminPanel.setVisible(false);
 			moneyAdminPanel.setVisible(false);
@@ -220,18 +208,63 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		}
 	}
 
-	// 자판기 총 잔고 계산 메서드
-	public static int calculateTotalBalance() {
+	private void addTableModelListeners() {
+		canModel.addTableModelListener(new TableModelListener() {
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				int row = e.getFirstRow();
+				int column = e.getColumn();
+
+				if (column == 0) { // 이름 변경
+					CanArray.canList.get(row).setCanName((String) canModel.getValueAt(row, column));
+				} else if (column == 1) { // 재고 변경
+					CanArray.canList.get(row).setCanNum(Integer.parseInt((String) canModel.getValueAt(row, column)));
+				} else if (column == 2) { // 가격 변경
+					CanArray.canList.get(row).setCanPrice(Integer.parseInt((String) canModel.getValueAt(row, column)));
+				}
+
+				panelLeft.updateCanLabels();
+				panelLeft.updateCanButtons();
+			}
+		});
+
+		moneyModel.addTableModelListener(new TableModelListener() {
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				int row = e.getFirstRow();
+				int column = e.getColumn();
+
+				if (column == 1) { // 남은 갯수 변경
+					CoinArray.coinList.get(row).setCoinNum(Integer.parseInt((String) moneyModel.getValueAt(row, column)));
+				}
+
+				updateTotalBalanceLabel();
+			}
+		});
+	}
+
+	public static void updateTotalBalanceLabel() {
 		int totalBalance = 0;
-		for (Coin coin : CoinArray.coinList) {
-			totalBalance += coin.getCoinNum() * Integer.parseInt(coin.getCoinName());
+		for (int i = 0; i < CoinArray.coinList.size(); i++) {
+			totalBalance += CoinArray.coinList.get(i).getCoinNum() * Integer.parseInt(CoinArray.coinList.get(i).getCoinName());
+		}
+		totalBalanceLabel.setText("자판기 총 잔고 : " + totalBalance);
+	}
+
+	private int calculateTotalBalance() {
+		int totalBalance = 0;
+		for (int i = 0; i < CoinArray.coinList.size(); i++) {
+			totalBalance += CoinArray.coinList.get(i).getCoinNum() * Integer.parseInt(CoinArray.coinList.get(i).getCoinName());
 		}
 		return totalBalance;
 	}
 
-	// 자판기 총 잔고 라벨 업데이트 메서드
-	public static void updateTotalBalanceLabel() {
-		totalBalanceLabel.setText("자판기 총 잔고 : " + calculateTotalBalance());
+	public static void updateMoneyTable() {
+		DefaultTableModel moneyModel = (DefaultTableModel) moneyTable.getModel();
+		moneyModel.setRowCount(0);
+		for (Coin coin : CoinArray.coinList) {
+			String[] row = {coin.getCoinName(), String.valueOf(coin.getCoinNum())};
+			moneyModel.addRow(row);
+		}
 	}
-
 }

@@ -11,8 +11,10 @@ import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JFrame;
+import javax.swing.table.DefaultTableModel;
 import java.util.regex.Pattern;
 
+import Coin.CoinArray;
 import Machine.MachineFrame;
 import Machine.MachinePanelRight;
 import Machine.MachineMain;
@@ -25,25 +27,66 @@ public class ActionCollectMoney implements ActionListener{
 		super();
 		this.money = money;
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
 		int Money = Integer.parseInt(money.getText());  // int형으로 변환
 
-		if (Money <= Admin.getTotalMoney()) {
-			// 수금할 금액이 총액보다 적으면 수금 가능, 총액에서 -
-			Admin.setTotalMoney(Admin.getTotalMoney() - Money);
-			MachinePanelRight.totalMoneyLabel.setText("총 매출액 : " + Admin.getTotalMoney());
-			JOptionPane.showMessageDialog(new JFrame(), Money + "원을 수금했습니다.");
-			
-		} 
-		
-		else {
-			// 수금할 금액이 총액보다 많으면 수금 불가능
-			JOptionPane.showMessageDialog(new JFrame(), "초과한 금액을 수금할 수 없습니다.\n "
-					+ "수금가능금액 : " + Admin.getTotalMoney() + "원");
-			
+		// 최소한의 화폐 수량
+		int[] minimumCoins = {5, 5, 5, 5, 5}; // 1000원, 500원, 100원, 50원, 10원 최소 5개씩 남겨두기
+		int[] coinValues = {1000, 500, 100, 50, 10};
+		int[] coinsToCollect = new int[coinValues.length];
+		int remainingAmount = Money;
+
+		// 현재 잔고 계산
+		int totalBalance = calculateTotalBalance();
+
+		// 최소 화폐를 남긴 상태에서 수금 가능한 최대 금액 계산
+		int maxCollectableAmount = totalBalance - calculateMinimumBalance(minimumCoins, coinValues);
+
+		if (Money > maxCollectableAmount) {
+			JOptionPane.showMessageDialog(null, "반환을 위한 최소한의 화폐를 남겨야 합니다.");
+			return;
 		}
+
+		// 1000원부터 수금
+		for (int i = 0; i < coinValues.length; i++) {
+			int availableCoins = CoinArray.coinList.get(i).getCoinNum() - minimumCoins[i];
+			int coinsNeeded = Math.min(remainingAmount / coinValues[i], availableCoins);
+			coinsToCollect[i] = coinsNeeded;
+			remainingAmount -= coinsNeeded * coinValues[i];
+		}
+
+		for (int i = 0; i < coinValues.length; i++) {
+			CoinArray.coinList.get(i).setCoinNum(CoinArray.coinList.get(i).getCoinNum() - coinsToCollect[i]);
+		}
+
+		// 잔돈 테이블 업데이트
+		DefaultTableModel moneyModel = (DefaultTableModel) MachinePanelRight.moneyTable.getModel();
+		moneyModel.setRowCount(0);
+		for (int i = 0; i < CoinArray.coinList.size(); i++) {
+			String arr[] = {CoinArray.coinList.get(i).getCoinName(), Integer.toString(CoinArray.coinList.get(i).getCoinNum())};
+			moneyModel.addRow(arr);
+		}
+
+		MachinePanelRight.updateTotalBalanceLabel();
+
+		JOptionPane.showMessageDialog(new JFrame(), Money + "원을 수금했습니다.");
+	}
+
+	private int calculateTotalBalance() {
+		int totalBalance = 0;
+		for (int i = 0; i < CoinArray.coinList.size(); i++) {
+			totalBalance += CoinArray.coinList.get(i).getCoinNum() * Integer.parseInt(CoinArray.coinList.get(i).getCoinName());
+		}
+		return totalBalance;
+	}
+
+	private int calculateMinimumBalance(int[] minimumCoins, int[] coinValues) {
+		int minimumBalance = 0;
+		for (int i = 0; i < coinValues.length; i++) {
+			minimumBalance += minimumCoins[i] * coinValues[i];
+		}
+		return minimumBalance;
 	}
 }

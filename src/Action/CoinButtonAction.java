@@ -59,7 +59,7 @@ public class CoinButtonAction implements ActionListener {
         DefaultTableModel moneyModel = (DefaultTableModel) MachinePanelRight.moneyTable.getModel();
         moneyModel.setRowCount(0);
         for (Coin coin : CoinArray.coinList) {
-            String[] row = { coin.getCoinName(), String.valueOf(coin.getCoinNum()) };
+            String[] row = {coin.getCoinName(), String.valueOf(coin.getCoinNum())};
             moneyModel.addRow(row);
         }
     }
