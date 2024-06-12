@@ -16,7 +16,10 @@ import Action.PutMoney;
 import Machine.MachinePanelRight;
 import Person.Admin;
 
-// 음료 추가 클래스
+/**
+ * 음료 추가 클래스
+ * -> 관리자 모드에서 음료의 재고를 추가할 수 있다.
+ */
 
 public class ActionAddCan implements ActionListener {
 

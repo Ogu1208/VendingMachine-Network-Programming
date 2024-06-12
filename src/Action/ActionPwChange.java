@@ -12,7 +12,11 @@ import Machine.MachineFrame;
 import Machine.MachinePanelRight;
 import Machine.MachineMain;
 import Person.Admin;
-// 비밀번호 변경 클래스
+
+/**
+ * 자판기의 관리자 비밀번호를 변경하는 액션을 처리하는 클래스
+ * 새로운 비밀번호를 입력받아 유효성 검사 후 변경
+ */
 public class ActionPwChange implements ActionListener{
 	
 	JTextField password;

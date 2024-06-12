@@ -1,6 +1,10 @@
 package Action;
 
-// 수금 클래스
+/**
+ *  자판기에서 돈을 수금하는 액션 처리 클래스
+ *  VendingMachine 객체에서 돈을 수금하고, 그 금액을 메시지로 표시
+ */
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 

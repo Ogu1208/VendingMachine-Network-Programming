@@ -21,11 +21,12 @@ public class MachineFrame extends JFrame {
 	public MachineFrame(String password){
 		Admin.setPassword(password);
 		// 음료 초기화
-		CanArray.canList.add(new Can("물", 5, 450));
-		CanArray.canList.add(new Can("커피", 5, 500));
-		CanArray.canList.add(new Can("이온음료", 5, 550));
-		CanArray.canList.add(new Can("고급커피", 5, 700));
-		CanArray.canList.add(new Can("탄산음료", 5, 750));
+		CanArray.canList.add(new Can("물", 10, 450));
+		CanArray.canList.add(new Can("커피", 10, 500));
+		CanArray.canList.add(new Can("이온음료", 10, 550));
+		CanArray.canList.add(new Can("고급커피", 10, 700));
+		CanArray.canList.add(new Can("탄산음료", 10, 750));
+		CanArray.canList.add(new Can("특화음료", 10, 800));
 		// 잔돈 초기화
 		CoinArray.coinList.add(new Coin("1000",10));
 		CoinArray.coinList.add(new Coin("500",10));
