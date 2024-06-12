@@ -36,12 +36,12 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 	DefaultTableModel canModel;
 	public static JLabel totalMoneyLabel, PWLabel, collectLabel;
 	public static JTable canTable, moneyTable;
-	private MachinePanelLeft panelLeft; // Left panel instance
+	private MachinePanelLeft panelLeft;
 
 	public MachinePanelRight(String password, MachinePanelLeft panelLeft) {
 		// 우측 관리자 판넬
 		this.password = password;
-		this.panelLeft = panelLeft; // Initialize left panel instance
+		this.panelLeft = panelLeft;
 
 		setPreferredSize(new Dimension(280, 630)); //윈도우창 크기 설정
 
@@ -74,22 +74,28 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 			canModel.addRow(arr);
 		}
 
+		// Listen for changes in the table model
 		canModel.addTableModelListener(new TableModelListener() {
 			@Override
 			public void tableChanged(TableModelEvent e) {
 				int row = e.getFirstRow();
 				int column = e.getColumn();
-				DefaultTableModel model = (DefaultTableModel) e.getSource();
-				String data = model.getValueAt(row, column).toString();
+				String columnName = canModel.getColumnName(column);
+				Object data = canModel.getValueAt(row, column);
 
-				if (column == 1) { // 재고 변경
-					CanArray.canList.get(row).setCanNum(Integer.parseInt(data));
-				} else if (column == 2) { // 가격 변경
-					CanArray.canList.get(row).setCanPrice(Integer.parseInt(data));
+				if (columnName.equals("재고")) {
+					int newStock = Integer.parseInt(data.toString());
+					CanArray.canList.get(row).setCanNum(newStock);
+				} else if (columnName.equals("개당 판매가격")) {
+					int newPrice = Integer.parseInt(data.toString());
+					CanArray.canList.get(row).setCanPrice(newPrice);
+				} else if (columnName.equals("음료이름")) {
+					String newName = data.toString();
+					CanArray.canList.get(row).setCanName(newName);
+					panelLeft.updateCanButton(); // Update the button names
 				}
 
-				// Update the left panel
-				panelLeft.updateCanLabels();
+				panelLeft.updateCanLabels(); // Update the can labels
 			}
 		});
 
@@ -203,8 +209,8 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// 관리자 접속 비밀번호확인
-		if (!canAdminPanel.isVisible()) {  // canAdminPanel이 보이지 않을 경우(많은 것들 중 canAdminpanel을 기준으로 함)
-			if (adminPass.getText().equals(Admin.password)) {  // 비밀번호가 일치할 경우
+		if(!canAdminPanel.isVisible()){  // canAdminPanel이 보이지 않을 경우(많은 것들 중 canAdminpanel을 기준으로 함)
+			if(adminPass.getText().equals(Admin.password)){  // 비밀번호가 일치할 경우
 
 				label.setVisible(false);
 				// 안보였던 판넬들 보이도록 변경
@@ -218,12 +224,14 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 				adminPass.setText("");
 				adminPass.setVisible(false);
 
-			} else if (adminPass.getText().equals("")) {  // 비밀번호를 입력하지 않았을 경우
+			}
+			else if(adminPass.getText().equals("")) {  // 비밀번호를 입력하지 않았을 경우
 				JOptionPane.showMessageDialog(new JFrame(), "비밀번호를 입력해주세요");
-			} else {  // 비밀번호가 틀렸을 경우
+			}
+			else {  // 비밀번호가 틀렸을 경우
 				JOptionPane.showMessageDialog(new JFrame(), "비밀번호가 틀렸습니다!");
 			}
-		} else if (canAdminPanel.isVisible()) { // canAdminPanel이 보일 경우
+		} else if(canAdminPanel.isVisible()){ // canAdminPanel이 보일 경우
 
 			// 각 판넬들을 보이지 않도록 변경
 			label.setVisible(true);
