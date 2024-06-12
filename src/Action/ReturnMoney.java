@@ -37,6 +37,7 @@ public class ReturnMoney implements ActionListener {
 
 		int returnMoney = Integer.parseInt(takeMoneytext.getText());
 		// 반환 금액을 정수형으로 변환
+		int totalReturnMoney = returnMoney; // 실제로 반환된 금액을 저장
 
 		if (returnMoney > 0) {  // 반환할 돈이 있으면
 			// 총 매출액에서 반환금을 빼고 RightPanel에서 총 매출액 text 다시 설정
@@ -46,8 +47,8 @@ public class ReturnMoney implements ActionListener {
 			// 현재 투입된 금액을 0으로 설정
 			takeMoneytext.setText("0");
 
-			// 반환 동전 목록들
-			int[] coinValues = {1000, 500, 100, 50, 10};
+			// 반환 동전 목록들 (지폐 제외)
+			int[] coinValues = {500, 100, 50, 10};
 			int[] returnCoins = new int[coinValues.length];
 
 			for (int i = 0; i < coinValues.length; i++) {
@@ -80,7 +81,7 @@ public class ReturnMoney implements ActionListener {
 				}
 			}
 
-			JOptionPane.showMessageDialog(new JFrame(), "반환된 금액: " + returnMoney + "원");
+			JOptionPane.showMessageDialog(new JFrame(), "반환된 금액: " + totalReturnMoney + "원");
 		}
 		else {
 			JOptionPane.showMessageDialog(new JFrame(), "반환할 돈이 없습니다.");
