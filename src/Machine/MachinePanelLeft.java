@@ -14,15 +14,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import Action.PutMoney;
-import Action.ReturnMoney;
-import Action.TakeCan;
-import Action.ButtonAction;
+import Action.*;
 import Can.CanArray;
 
 public class MachinePanelLeft extends JPanel {
 	JButton getCan, canButton;
-	JTextField putMoneytext, takeMoneytext;
+	JTextField takeMoneytext;
 
 	public MachinePanelLeft() {
 		// 좌측 자판기 판넬
@@ -31,8 +28,8 @@ public class MachinePanelLeft extends JPanel {
 		List<JButton> blist = new ArrayList<JButton>();   // 버튼 리스트
 
 		// ------------<돈 입출구>-----------//
-		JPanel moneyPanel = new JPanel();   // 돈 출입구 판넬(가장큰틀)
-		// 반환구(반환버튼)
+		JPanel moneyPanel = new JPanel();   // 돈 출입구 판넬(가장 큰 틀)
+		// 반환구(반환 버튼)
 		JPanel takeMoneyPanel = new JPanel();
 		takeMoneytext = new JTextField(6);
 		takeMoneytext.setText("0"); // 0으로 초기화
@@ -41,28 +38,33 @@ public class MachinePanelLeft extends JPanel {
 		takeMoneyButton.setContentAreaFilled(false);
 		takeMoneyButton.addActionListener(new ReturnMoney(takeMoneytext, getCan, blist)); // 버튼 액션
 
-		//투입구
+		// 투입구
 		JPanel putMoneyPanel = new JPanel();
-		putMoneytext = new JTextField(6);
-		
-		putMoneytext.addActionListener(new PutMoney(putMoneytext, takeMoneytext, blist));  // 버튼 액션
-		JButton putMoneyButton = new JButton("투입");  // 버튼
-		putMoneyButton.addActionListener(new PutMoney(putMoneytext, takeMoneytext, blist));  // 버튼 액션
-		
-		takeMoneytext.setEditable(false);   // 반환구 JTextField는 수정 불가능(기본값은 수정가능)
-		takeMoneyPanel.add(takeMoneytext);  // 반환판넬에 추가
+		putMoneyPanel.setLayout(new GridLayout(2, 3)); // 2행 3열 그리드 레이아웃
+
+		// 동전 및 지폐 버튼 추가
+		List<JButton> coinButtons = createCoinButtons();
+		List<JButton> billButtons = createBillButtons();
+
+		for (JButton button : coinButtons) {
+			putMoneyPanel.add(button);
+		}
+		for (JButton button : billButtons) {
+			putMoneyPanel.add(button);
+		}
+
+		takeMoneytext.setEditable(false);   // 반환구 JTextField는 수정 불가능(기본값은 수정 가능)
+		takeMoneyPanel.add(takeMoneytext);  // 반환 판넬에 추가
 		takeMoneyPanel.add(takeMoneyButton);
-		putMoneyPanel.add(putMoneytext); // 투입판넬에 추가
-		putMoneyPanel.add(putMoneyButton);
-		
-		moneyPanel.add(takeMoneyPanel);  // 돈 출입구 판넬(가장큰틀)에 반환, 투입판넬추가
+
+		moneyPanel.add(takeMoneyPanel);  // 돈 출입구 판넬(가장 큰 틀)에 반환, 투입 판넬 추가
 		moneyPanel.add(putMoneyPanel);
 
 		// ----------<음료반환구>----------------//
 		JPanel getCanPanel = new JPanel();
-		getCan = new JButton("");  // 음료 반환 버튼(검은색음료배출구)
+		getCan = new JButton("");  // 음료 반환 버튼(검은색 음료 배출구)
 		getCan.addActionListener(new TakeCan(getCan)); // 버튼 액션
-		getCan.setIcon(new ImageIcon("canreturn.png")); 
+		getCan.setIcon(new ImageIcon("canreturn.png"));
 		getCan.setBorder(BorderFactory.createEmptyBorder());
 		getCan.setContentAreaFilled(false);
 
@@ -70,7 +72,7 @@ public class MachinePanelLeft extends JPanel {
 
 		// ------------<음료선택>----------//
 		JPanel selectCan = new JPanel(new GridLayout(2, 1));
-		selectCan.setPreferredSize(new Dimension(310, 330));  // 흰색부분
+		selectCan.setPreferredSize(new Dimension(310, 330));  // 흰색 부분
 
 		for (int i = 0; i < CanArray.canList.size(); i++) {
 			JPanel canEach = new JPanel();
@@ -90,13 +92,38 @@ public class MachinePanelLeft extends JPanel {
 		add(selectCan, BorderLayout.NORTH);  // 음료 선택 북쪽
 		add(moneyPanel, BorderLayout.CENTER);  // 돈 입출구 중앙
 		add(getCanPanel, BorderLayout.SOUTH);  // 음료 반환구 남쪽
-		
-		//각 패널 배경색상 설정
+
+		// 각 패널 배경 색상 설정
 		moneyPanel.setBackground(new Color(70, 152, 64));
 		takeMoneyPanel.setBackground(new Color(70, 152, 64));
 		putMoneyPanel.setBackground(new Color(70, 152, 64));
 		getCanPanel.setBackground(new Color(70, 152, 64));
 		setBackground(new Color(70, 152, 64));
+	}
 
+	private List<JButton> createCoinButtons() {
+		List<JButton> buttons = new ArrayList<>();
+		int[] coinValues = {10, 50, 100, 500};
+
+		for (int value : coinValues) {
+			JButton button = new JButton(value + "원");
+			button.addActionListener(new CoinButtonAction(value, takeMoneytext));
+			buttons.add(button);
+		}
+
+		return buttons;
+	}
+
+	private List<JButton> createBillButtons() {
+		List<JButton> buttons = new ArrayList<>();
+		int[] billValues = {1000};
+
+		for (int value : billValues) {
+			JButton button = new JButton(value + "원");
+			button.addActionListener(new BillButtonAction(value, takeMoneytext));
+			buttons.add(button);
+		}
+
+		return buttons;
 	}
 }
