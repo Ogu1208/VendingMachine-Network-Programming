@@ -1,6 +1,7 @@
 package Action;
 
 import Can.CanArray;
+import Coin.Coin;
 import Coin.CoinArray;
 import Machine.MachinePanelRight;
 import Person.Admin;
@@ -43,7 +44,31 @@ public class BillButtonAction implements ActionListener {
         Admin.setTotalMoney(totalMoney);
         MachinePanelRight.totalMoneyLabel.setText("ÃÑ ¸ÅÃâ¾× : " + totalMoney);
 
+        // Add the bill to CoinArray
+        addCoinToCoinArray(billValue);
+
+        // Update the coin table in the right panel
+        updateCoinTable();
+
         updateButtonColors(currentMoney);
+    }
+
+    private void addCoinToCoinArray(int billValue) {
+        for (Coin coin : CoinArray.coinList) {
+            if (coin.getCoinName().equals(String.valueOf(billValue))) {
+                coin.setCoinNum(coin.getCoinNum() + 1);
+                break;
+            }
+        }
+    }
+
+    private void updateCoinTable() {
+        DefaultTableModel moneyModel = (DefaultTableModel) MachinePanelRight.moneyTable.getModel();
+        moneyModel.setRowCount(0);
+        for (Coin coin : CoinArray.coinList) {
+            String[] row = {coin.getCoinName(), String.valueOf(coin.getCoinNum())};
+            moneyModel.addRow(row);
+        }
     }
 
     private void updateButtonColors(int currentMoney) {

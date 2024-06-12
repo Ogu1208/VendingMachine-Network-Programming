@@ -2,6 +2,7 @@ package Action;
 
 import Can.CanArray;
 import Coin.CoinArray;
+import Coin.Coin;
 import Machine.MachinePanelRight;
 import Person.Admin;
 
@@ -35,7 +36,31 @@ public class CoinButtonAction implements ActionListener {
         Admin.setTotalMoney(totalMoney);
         MachinePanelRight.totalMoneyLabel.setText("ÃÑ ¸ÅÃâ¾× : " + totalMoney);
 
+        // Add the coin to CoinArray
+        addCoinToCoinArray(coinValue);
+
+        // Update the coin table in the right panel
+        updateCoinTable();
+
         updateButtonColors(currentMoney);
+    }
+
+    private void addCoinToCoinArray(int coinValue) {
+        for (Coin coin : CoinArray.coinList) {
+            if (coin.getCoinName().equals(String.valueOf(coinValue))) {
+                coin.setCoinNum(coin.getCoinNum() + 1);
+                break;
+            }
+        }
+    }
+
+    private void updateCoinTable() {
+        DefaultTableModel moneyModel = (DefaultTableModel) MachinePanelRight.moneyTable.getModel();
+        moneyModel.setRowCount(0);
+        for (Coin coin : CoinArray.coinList) {
+            String[] row = { coin.getCoinName(), String.valueOf(coin.getCoinNum()) };
+            moneyModel.addRow(row);
+        }
     }
 
     private void updateButtonColors(int currentMoney) {
