@@ -17,8 +17,8 @@ import Coin.CoinArray;
 import Person.Admin;
 
 public class MachineFrame extends JFrame {
-	// 자판기의 전체적인틀
-	public MachineFrame(String password){
+	// 자판기의 전체적인 틀
+	public MachineFrame(String password) {
 		Admin.setPassword(password);
 		// 음료 초기화
 		CanArray.canList.add(new Can("물", 10, 450));
@@ -28,16 +28,16 @@ public class MachineFrame extends JFrame {
 		CanArray.canList.add(new Can("탄산음료", 10, 750));
 		CanArray.canList.add(new Can("특화음료", 10, 800));
 		// 잔돈 초기화
-		CoinArray.coinList.add(new Coin("1000",10));
-		CoinArray.coinList.add(new Coin("500",10));
-		CoinArray.coinList.add(new Coin("100",10));
-		CoinArray.coinList.add(new Coin("50",10));
-		CoinArray.coinList.add(new Coin("10",10));
-		
+		CoinArray.coinList.add(new Coin("1000", 10));
+		CoinArray.coinList.add(new Coin("500", 10));
+		CoinArray.coinList.add(new Coin("100", 10));
+		CoinArray.coinList.add(new Coin("50", 10));
+		CoinArray.coinList.add(new Coin("10", 10));
+
 		// 윈도우 이벤트 등록 및 설정
 		setTitle("자판기 관리 프로그램");
-		setPreferredSize(new Dimension(650,630));
-		setLocation(400,150);
+		setPreferredSize(new Dimension(650, 630));
+		setLocation(400, 150);
 		WindowListener win = new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -49,15 +49,14 @@ public class MachineFrame extends JFrame {
 
 		// 자판기 왼쪽 판넬과 오른쪽 판넬 구성
 		Container contentPanel = getContentPane();
-		
-		JPanel panelRight = new MachinePanelRight(password);
-		JPanel panelLeft = new MachinePanelLeft();
-		
-		contentPanel.add(panelRight,BorderLayout.EAST);
-		contentPanel.add(panelLeft,BorderLayout.CENTER);
+
+		MachinePanelLeft panelLeft = new MachinePanelLeft();
+		MachinePanelRight panelRight = new MachinePanelRight(password, panelLeft);
+
+		contentPanel.add(panelRight, BorderLayout.EAST);
+		contentPanel.add(panelLeft, BorderLayout.CENTER);
 
 		pack();
 		setVisible(true);
-		
 	}
 }

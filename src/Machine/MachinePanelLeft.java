@@ -21,12 +21,15 @@ public class MachinePanelLeft extends JPanel {
 
 	JButton getCan, canButton;
 	JTextField takeMoneytext;
+	List<JButton> blist;
+	List<JLabel> priceLabels;
 
 	public MachinePanelLeft() {
 		// 좌측 자판기 판넬
 
 		setPreferredSize(new Dimension(320, 630));
-		List<JButton> blist = new ArrayList<JButton>();   // 버튼 리스트
+		blist = new ArrayList<JButton>();   // 버튼 리스트
+		priceLabels = new ArrayList<>();    // 가격 라벨 리스트
 
 		// ------------<돈 입출구>-----------//
 		JPanel moneyPanel = new JPanel();   // 돈 출입구 판넬(가장 큰 틀)
@@ -78,6 +81,7 @@ public class MachinePanelLeft extends JPanel {
 		for (int i = 0; i < CanArray.canList.size(); i++) {
 			JPanel canEach = new JPanel();
 			JLabel canLabel = new JLabel(CanArray.canList.get(i).getCanPrice() + "원");
+			priceLabels.add(canLabel);
 			canButton = new JButton(CanArray.canList.get(i).getCanName());
 			canButton.addActionListener(new ButtonAction(takeMoneytext, getCan, blist));
 			canButton.setForeground(new Color(0, 0, 0));  // 음료 텍스트 색상
@@ -126,5 +130,12 @@ public class MachinePanelLeft extends JPanel {
 		}
 
 		return buttons;
+	}
+
+	public void updateCanLabels() {
+		for (int i = 0; i < priceLabels.size(); i++) {
+			JLabel label = priceLabels.get(i);
+			label.setText(CanArray.canList.get(i).getCanPrice() + "원");
+		}
 	}
 }
