@@ -34,53 +34,55 @@ public class PutMoney implements ActionListener {
 		// 정규식 조건문
 		if (putMoneytext.getText().equals("")) {
 			JOptionPane.showMessageDialog(new JFrame(), "돈을 넣지 않았습니다.");
-		}
-		else if (Pattern.matches("^[0-9]*$", putMoneytext.getText())) {
+		} else if (Pattern.matches("^[0-9]*$", putMoneytext.getText())) {
 			boolean pattern;
 
 			if (Integer.parseInt(putMoneytext.getText()) < 100) {
 				// 100원 이하면
 				pattern = Pattern.matches("[0,5]?0$", putMoneytext.getText());
-			}
-			else if (Integer.parseInt(putMoneytext.getText()) <= 5000) {
+			} else if (Integer.parseInt(putMoneytext.getText()) <= 5000) {
 				// 5000원 이하면
 				pattern = Pattern.matches("[1-9]((\\d){0,2}[0,5])?0$", putMoneytext.getText());
-			}
-			else {
+			} else {
 				// 투입 가능 금액 초과면
 				pattern = false;
 			}
 
 			if (pattern == false) { // 투입 가능 금액 초과면
 				JOptionPane.showMessageDialog(new JFrame(), "5000원 이하로 투입할 수 있습니다.");
-			}
-			else {
+			} else {
 				int currentMoney = Integer.parseInt(putMoneytext.getText());
 				int totalMoney = Admin.getTotalMoney() + currentMoney;
 				Admin.setTotalMoney(totalMoney);
 				MachinePanelRight.totalMoneyLabel.setText("총 매출액 : " + totalMoney);
 
-				takeMoneytext.setText(String.valueOf(
-						Integer.parseInt(takeMoneytext.getText()) + currentMoney));
+				int newTotal = Integer.parseInt(takeMoneytext.getText()) + currentMoney;
+				takeMoneytext.setText(String.valueOf(newTotal));
 				putMoneytext.setText("");
 
-				for (int i = 0; i < blist.size(); i++) {
-					if (blist.get(i).getLabel().equals(CanArray.canList.get(i).getCanName())) {
-						if (CanArray.canList.get(i).getCanNum() == 0) {
-							blist.get(i).setForeground(new Color(255, 255, 255));
-							blist.get(i).setBackground(new Color(204, 61, 61)); // 빨간색
-						}
-						if (CanArray.canList.get(i).getCanPrice() <= Integer.parseInt(takeMoneytext.getText())
-								&& CanArray.canList.get(i).getCanNum() > 0) {  // 재고가 있고 투입금액이 충분하면
-							blist.get(i).setForeground(new Color(255, 255, 255));
-							blist.get(i).setBackground(new Color(20, 175, 100));
-						}
-					}
-				}
+				updateButtonColors(newTotal);
 			}
-		}
-		else {
+		} else {
 			JOptionPane.showMessageDialog(new JFrame(), "숫자 형식으로 입력하세요");
+		}
+	}
+
+	private void updateButtonColors(int currentMoney) {
+		for (int i = 0; i < blist.size(); i++) {
+			JButton button = blist.get(i);
+			int canPrice = CanArray.canList.get(i).getCanPrice();
+			int canNum = CanArray.canList.get(i).getCanNum();
+
+			if (canNum == 0) {
+				button.setForeground(new Color(255, 255, 255));
+				button.setBackground(new Color(204, 61, 61)); // 빨간색
+			} else if (canPrice <= currentMoney) {
+				button.setForeground(new Color(255, 255, 255));
+				button.setBackground(new Color(20, 175, 100)); // 초록색
+			} else {
+				button.setForeground(new Color(0, 0, 0));
+				button.setBackground(new Color(255, 255, 255)); // 흰색
+			}
 		}
 	}
 }

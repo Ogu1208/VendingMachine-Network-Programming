@@ -18,6 +18,7 @@ import Action.*;
 import Can.CanArray;
 
 public class MachinePanelLeft extends JPanel {
+
 	JButton getCan, canButton;
 	JTextField takeMoneytext;
 
@@ -43,8 +44,8 @@ public class MachinePanelLeft extends JPanel {
 		putMoneyPanel.setLayout(new GridLayout(2, 3)); // 2행 3열 그리드 레이아웃
 
 		// 동전 및 지폐 버튼 추가
-		List<JButton> coinButtons = createCoinButtons();
-		List<JButton> billButtons = createBillButtons();
+		List<JButton> coinButtons = createCoinButtons(blist);
+		List<JButton> billButtons = createBillButtons(blist);
 
 		for (JButton button : coinButtons) {
 			putMoneyPanel.add(button);
@@ -101,26 +102,26 @@ public class MachinePanelLeft extends JPanel {
 		setBackground(new Color(70, 152, 64));
 	}
 
-	private List<JButton> createCoinButtons() {
+	private List<JButton> createCoinButtons(List<JButton> blist) {
 		List<JButton> buttons = new ArrayList<>();
 		int[] coinValues = {10, 50, 100, 500};
 
 		for (int value : coinValues) {
 			JButton button = new JButton(value + "원");
-			button.addActionListener(new CoinButtonAction(value, takeMoneytext));
+			button.addActionListener(new CoinButtonAction(value, takeMoneytext, blist));
 			buttons.add(button);
 		}
 
 		return buttons;
 	}
 
-	private List<JButton> createBillButtons() {
+	private List<JButton> createBillButtons(List<JButton> blist) {
 		List<JButton> buttons = new ArrayList<>();
 		int[] billValues = {1000};
 
 		for (int value : billValues) {
 			JButton button = new JButton(value + "원");
-			button.addActionListener(new BillButtonAction(value, takeMoneytext));
+			button.addActionListener(new BillButtonAction(value, takeMoneytext, blist));
 			buttons.add(button);
 		}
 
