@@ -50,6 +50,14 @@ public class BillButtonAction implements ActionListener {
         }
     }
 
+    public static int getTotalBillAmount() {
+        return totalBillAmount;
+    }
+
+    public static void resetTotalBillAmount() {
+        totalBillAmount = 0;
+    }
+
     private void updateMoneyTable() {
         DefaultTableModel moneyModel = (DefaultTableModel) MachinePanelRight.moneyTable.getModel();
         moneyModel.setRowCount(0);
