@@ -29,6 +29,12 @@ public class CoinButtonAction implements ActionListener {
         int currentMoney = Integer.parseInt(takeMoneytext.getText());
         currentMoney += coinValue;
         takeMoneytext.setText(String.valueOf(currentMoney));
+
+        // Update total money
+        int totalMoney = Admin.getTotalMoney() + coinValue;
+        Admin.setTotalMoney(totalMoney);
+        MachinePanelRight.totalMoneyLabel.setText("ÃÑ ¸ÅÃâ¾× : " + totalMoney);
+
         updateButtonColors(currentMoney);
     }
 

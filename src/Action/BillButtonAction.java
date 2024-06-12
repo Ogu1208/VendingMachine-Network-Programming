@@ -37,6 +37,12 @@ public class BillButtonAction implements ActionListener {
         currentMoney += billValue;
         totalBillAmount += billValue;
         takeMoneytext.setText(String.valueOf(currentMoney));
+
+        // Update total money
+        int totalMoney = Admin.getTotalMoney() + billValue;
+        Admin.setTotalMoney(totalMoney);
+        MachinePanelRight.totalMoneyLabel.setText("ÃÑ ¸ÅÃâ¾× : " + totalMoney);
+
         updateButtonColors(currentMoney);
     }
 
