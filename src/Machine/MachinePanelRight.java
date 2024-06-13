@@ -3,15 +3,11 @@ package Machine;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -21,16 +17,21 @@ import Action.AddCoinFrame;
 import Action.ActionPwChange;
 import Action.ActionCollectMoney;
 import Can.CanArray;
+import Can.Can;
 import Coin.CoinArray;
 import Coin.Coin;
 import Person.Admin;
+import util.SalesData;
+import util.SalesManager;
 
 
 public class MachinePanelRight extends JPanel implements ActionListener {
 
+	private static final String INVENTORY_DATA_FILE = "inventory_data.dat";
+	private SalesManager salesManager;
 	JTextField adminPass, changePW, collectMoney;
 	JPanel canAdminPanel, moneyAdminPanel, moneyTotalPanel, PWPanel, collectPanel;
-	JButton btnAdminIn, btnAddCanStart, btnAddCan;
+	JButton btnAdminIn, btnAddCanStart, btnAddCan, salesReportButton;
 	JLabel label;
 	String password;
 	DefaultTableModel canModel, moneyModel;
@@ -38,9 +39,10 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 	public static JTable canTable, moneyTable;
 	MachinePanelLeft panelLeft;
 
-	public MachinePanelRight(String password, MachinePanelLeft panelLeft) {
+	public MachinePanelRight(String password, MachinePanelLeft panelLeft, SalesManager salesManager) {
 		this.password = password;
 		this.panelLeft = panelLeft;
+		this.salesManager = salesManager;
 
 		setPreferredSize(new Dimension(280, 630));
 
@@ -54,7 +56,7 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		canModel = new DefaultTableModel(canColName, 0);
 		canTable = new JTable(canModel);
 		JScrollPane canScrollPanel = new JScrollPane(canTable);
-		canScrollPanel.setPreferredSize(new Dimension(230, 150));
+		canScrollPanel.setPreferredSize(new Dimension(230, 130));
 
 		btnAddCan = new JButton("음료추가");
 		btnAddCan.addActionListener(new AddCanFrame(canTable));
@@ -78,7 +80,7 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		moneyModel = new DefaultTableModel(moneyColName, 0);
 		moneyTable = new JTable(moneyModel);
 		JScrollPane moneyScrollPanel = new JScrollPane(moneyTable);
-		moneyScrollPanel.setPreferredSize(new Dimension(230, 150));
+		moneyScrollPanel.setPreferredSize(new Dimension(230, 120));
 
 		JButton btnAddMoney = new JButton("잔돈추가");
 		btnAddMoney.addActionListener(new AddCoinFrame(moneyTable));
@@ -164,6 +166,17 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		inAdminPanel.add(adminPass);
 		inAdminPanel.add(btnAdminIn);
 
+		// 매출 보고서 버튼 추가
+		salesReportButton = new JButton("일별/월별 매출 확인");
+		salesReportButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				showSalesReport();
+			}
+		});
+
+		collectPanel.add(salesReportButton, BorderLayout.CENTER);
+
 		add(inAdminPanel);
 		add(canAdminPanel);
 		add(label);
@@ -173,6 +186,7 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		add(collectPanel);
 
 		addTableModelListeners();
+		loadInventoryData();
 	}
 
 	@Override
@@ -206,6 +220,9 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 			btnAdminIn.setText("접속");
 			adminPass.setVisible(true);
 		}
+
+		salesManager.saveSalesData();
+		saveInventoryData();
 	}
 
 	private void addTableModelListeners() {
@@ -245,16 +262,16 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 
 	public static void updateTotalBalanceLabel() {
 		int totalBalance = 0;
-		for (int i = 0; i < CoinArray.coinList.size(); i++) {
-			totalBalance += CoinArray.coinList.get(i).getCoinNum() * Integer.parseInt(CoinArray.coinList.get(i).getCoinName());
+		for (Coin coin : CoinArray.coinList) {
+			totalBalance += coin.getCoinNum() * Integer.parseInt(coin.getCoinName());
 		}
 		totalBalanceLabel.setText("자판기 총 잔고 : " + totalBalance);
 	}
 
 	private int calculateTotalBalance() {
 		int totalBalance = 0;
-		for (int i = 0; i < CoinArray.coinList.size(); i++) {
-			totalBalance += CoinArray.coinList.get(i).getCoinNum() * Integer.parseInt(CoinArray.coinList.get(i).getCoinName());
+		for (Coin coin : CoinArray.coinList) {
+			totalBalance += coin.getCoinNum() * Integer.parseInt(coin.getCoinName());
 		}
 		return totalBalance;
 	}
@@ -267,4 +284,94 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 			moneyModel.addRow(row);
 		}
 	}
+
+	private void showSalesReport() {
+		Map<String, Integer> dailySales = new HashMap<>();
+		Map<String, Integer> monthlySales = new HashMap<>();
+		Map<String, Map<String, Integer>> dailyCanSales = new HashMap<>();
+		Map<String, Map<String, Integer>> monthlyCanSales = new HashMap<>();
+
+		for (SalesData salesData : salesManager.getSalesList()) {
+			String date = salesData.getDate();
+			String month = date.substring(0, 7); // "yyyy-MM"
+
+			// 일별 전체 매출
+			dailySales.put(date, dailySales.getOrDefault(date, 0) + salesData.getTotalSales());
+
+			// 월별 전체 매출
+			monthlySales.put(month, monthlySales.getOrDefault(month, 0) + salesData.getTotalSales());
+
+			// 일별 음료 매출
+			dailyCanSales.putIfAbsent(date, new HashMap<>());
+			dailyCanSales.get(date).put(salesData.getCanName(),
+					dailyCanSales.get(date).getOrDefault(salesData.getCanName(), 0) + salesData.getTotalSales());
+
+			// 월별 음료 매출
+			monthlyCanSales.putIfAbsent(month, new HashMap<>());
+			monthlyCanSales.get(month).put(salesData.getCanName(),
+					monthlyCanSales.get(month).getOrDefault(salesData.getCanName(), 0) + salesData.getTotalSales());
+		}
+
+		StringBuilder report = new StringBuilder();
+
+		// 전체 일별 매출
+		report.append("전체 일별 매출:\n");
+		for (String date : dailySales.keySet()) {
+			report.append(date).append(": ").append(dailySales.get(date)).append("원\n");
+		}
+		report.append("\n");
+
+		// 전체 월별 매출
+		report.append("전체 월별 매출:\n");
+		for (String month : monthlySales.keySet()) {
+			report.append(month).append(": ").append(monthlySales.get(month)).append("원\n");
+		}
+		report.append("\n");
+
+		// 각 음료의 일별 매출
+		report.append("각 음료의 일별 매출:\n");
+		for (String date : dailyCanSales.keySet()) {
+			report.append(date).append(":\n");
+			for (String canName : dailyCanSales.get(date).keySet()) {
+				report.append("  ").append(canName).append(": ").append(dailyCanSales.get(date).get(canName)).append("원\n");
+			}
+		}
+		report.append("\n");
+
+		// 각 음료의 월별 매출
+		report.append("각 음료의 월별 매출:\n");
+		for (String month : monthlyCanSales.keySet()) {
+			report.append(month).append(":\n");
+			for (String canName : monthlyCanSales.get(month).keySet()) {
+				report.append("  ").append(canName).append(": ").append(monthlyCanSales.get(month).get(canName)).append("원\n");
+			}
+		}
+
+		JTextArea textArea = new JTextArea(report.toString());
+		textArea.setEditable(false);
+		JScrollPane scrollPane = new JScrollPane(textArea);
+		scrollPane.setPreferredSize(new Dimension(400, 300));
+
+		JOptionPane.showMessageDialog(null, scrollPane, "매출 보고서", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void loadInventoryData() {
+		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(INVENTORY_DATA_FILE))) {
+			CanArray.canList = (java.util.List<Can>) ois.readObject();
+			CoinArray.coinList = (java.util.List<Coin>) ois.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void saveInventoryData() {
+		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(INVENTORY_DATA_FILE))) {
+			oos.writeObject(CanArray.canList);
+			oos.writeObject(CoinArray.coinList);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

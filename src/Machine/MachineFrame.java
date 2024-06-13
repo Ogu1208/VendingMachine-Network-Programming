@@ -15,11 +15,13 @@ import Can.CanArray;
 import Coin.Coin;
 import Coin.CoinArray;
 import Person.Admin;
+import util.SalesManager;
 
 public class MachineFrame extends JFrame {
 	// 자판기의 전체적인 틀
 	public MachineFrame(String password) {
 		Admin.setPassword(password);
+		SalesManager salesManager = new SalesManager();
 		// 음료 초기화
 		CanArray.canList.add(new Can("물", 10, 450));
 		CanArray.canList.add(new Can("커피", 10, 500));
@@ -50,8 +52,8 @@ public class MachineFrame extends JFrame {
 		// 자판기 왼쪽 판넬과 오른쪽 판넬 구성
 		Container contentPanel = getContentPane();
 
-		MachinePanelLeft panelLeft = new MachinePanelLeft();
-		MachinePanelRight panelRight = new MachinePanelRight(password, panelLeft);
+		MachinePanelLeft panelLeft = new MachinePanelLeft(salesManager);
+		MachinePanelRight panelRight = new MachinePanelRight(password, panelLeft, salesManager);
 
 		contentPanel.add(panelRight, BorderLayout.EAST);
 		contentPanel.add(panelLeft, BorderLayout.CENTER);
