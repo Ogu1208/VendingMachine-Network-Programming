@@ -4,14 +4,14 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 
 import Action.AddCanFrame;
 import Action.AddCoinFrame;
@@ -287,96 +287,96 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 	}
 
 	private void showSalesReport() {
-		Map<String, Integer> dailySales = new LinkedHashMap<>();
-		Map<String, Integer> monthlySales = new LinkedHashMap<>();
-		Map<String, Map<String, Integer>> dailyCanSales = new LinkedHashMap<>();
-		Map<String, Map<String, Integer>> monthlyCanSales = new LinkedHashMap<>();
-		Map<String, Map<String, Integer>> dailyCanQuantity = new LinkedHashMap<>();
-		Map<String, Map<String, Integer>> monthlyCanQuantity = new LinkedHashMap<>();
+		JDialog salesDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "매출 보고서", true);
+		salesDialog.setSize(800, 600);
+		salesDialog.setLayout(new BorderLayout());
 
-		for (SalesData salesData : salesManager.getSalesList()) {
-			String date = salesData.getDate();
-			String month = date.substring(0, 7); // "yyyy-MM"
+		// 테이블 모델과 JTable 생성
+		String[] columnNames = {"날짜", "음료", "매출액", "판매량"};
+		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+		JTable salesTable = new JTable(tableModel);
+		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+		salesTable.setRowSorter(sorter);
 
-			// 일별 전체 매출
-			dailySales.put(date, dailySales.getOrDefault(date, 0) + salesData.getTotalSales());
-
-			// 월별 전체 매출
-			monthlySales.put(month, monthlySales.getOrDefault(month, 0) + salesData.getTotalSales());
-
-			// 일별 음료 매출
-			dailyCanSales.putIfAbsent(date, new LinkedHashMap<>());
-			dailyCanSales.get(date).put(salesData.getCanName(),
-					dailyCanSales.get(date).getOrDefault(salesData.getCanName(), 0) + salesData.getTotalSales());
-
-			// 월별 음료 매출
-			monthlyCanSales.putIfAbsent(month, new LinkedHashMap<>());
-			monthlyCanSales.get(month).put(salesData.getCanName(),
-					monthlyCanSales.get(month).getOrDefault(salesData.getCanName(), 0) + salesData.getTotalSales());
-
-			// 일별 음료 판매 개수
-			dailyCanQuantity.putIfAbsent(date, new LinkedHashMap<>());
-			dailyCanQuantity.get(date).put(salesData.getCanName(),
-					dailyCanQuantity.get(date).getOrDefault(salesData.getCanName(), 0) + salesData.getQuantitySold());
-
-			// 월별 음료 판매 개수
-			monthlyCanQuantity.putIfAbsent(month, new LinkedHashMap<>());
-			monthlyCanQuantity.get(month).put(salesData.getCanName(),
-					monthlyCanQuantity.get(month).getOrDefault(salesData.getCanName(), 0) + salesData.getQuantitySold());
+		// 데이터 채우기
+		List<SalesData> salesDataList = salesManager.getSalesList();
+		salesDataList.sort(Comparator.comparing(SalesData::getDate).reversed());
+		for (SalesData salesData : salesDataList) {
+			tableModel.addRow(new Object[]{salesData.getDate(), salesData.getCanName(), salesData.getTotalSales(), salesData.getQuantitySold()});
 		}
 
-		StringBuilder report = new StringBuilder();
+		JScrollPane scrollPane = new JScrollPane(salesTable);
+		salesDialog.add(scrollPane, BorderLayout.CENTER);
 
-		// 전체 월별 매출
-		report.append("전체 월별 매출:\n");
-		monthlySales.entrySet().stream()
-				.sorted(Map.Entry.<String, Integer>comparingByKey().reversed())
-				.forEach(entry -> report.append(entry.getKey()).append(": ").append(entry.getValue()).append("원\n"));
-		report.append("\n");
+		// 버튼 패널 생성
+		JPanel buttonPanel = new JPanel();
+		JButton sortByDateButton = new JButton("날짜순 정렬");
+		JButton sortByPriceButton = new JButton("매출액순 정렬");
+		JButton sortByVolumeButton = new JButton("판매량순 정렬");
+		JButton monthlyReportButton = new JButton("월별 보고서");
 
-		// 각 음료의 월별 매출
-		report.append("각 음료의 월별 매출:\n");
-		monthlyCanSales.entrySet().stream()
-				.sorted(Map.Entry.<String, Map<String, Integer>>comparingByKey().reversed())
-				.forEach(entry -> {
-					report.append(entry.getKey()).append(":\n");
-					entry.getValue().forEach((canName, sales) ->
-							report.append("  ").append(canName).append(": ").append(sales).append("원 (")
-									.append(monthlyCanQuantity.get(entry.getKey()).get(canName)).append("개)\n"));
-				});
-		report.append("\n");
+		buttonPanel.add(sortByDateButton);
+		buttonPanel.add(sortByPriceButton);
+		buttonPanel.add(sortByVolumeButton);
+		buttonPanel.add(monthlyReportButton);
+		salesDialog.add(buttonPanel, BorderLayout.SOUTH);
 
-		// 전체 일별 매출
-		report.append("전체 일별 매출:\n");
-		dailySales.entrySet().stream()
-				.sorted(Map.Entry.<String, Integer>comparingByKey().reversed())
-				.forEach(entry -> report.append(entry.getKey()).append(": ").append(entry.getValue()).append("원\n"));
-		report.append("\n");
+		// 버튼 이벤트 리스너 추가
+		sortByDateButton.addActionListener(e -> sorter.setSortKeys(Collections.singletonList(new RowSorter.SortKey(0, SortOrder.DESCENDING))));
+		sortByPriceButton.addActionListener(e -> sorter.setSortKeys(Collections.singletonList(new RowSorter.SortKey(2, SortOrder.DESCENDING))));
+		sortByVolumeButton.addActionListener(e -> sorter.setSortKeys(Collections.singletonList(new RowSorter.SortKey(3, SortOrder.DESCENDING))));
+		monthlyReportButton.addActionListener(e -> showMonthlyReport());
 
-		// 각 음료의 일별 매출
-		report.append("각 음료의 일별 매출:\n");
-		dailyCanSales.entrySet().stream()
-				.sorted(Map.Entry.<String, Map<String, Integer>>comparingByKey().reversed())
-				.forEach(entry -> {
-					report.append(entry.getKey()).append(":\n");
-					entry.getValue().forEach((canName, sales) ->
-							report.append("  ").append(canName).append(": ").append(sales).append("원 (")
-									.append(dailyCanQuantity.get(entry.getKey()).get(canName)).append("개)\n"));
-				});
-
-		JTextArea textArea = new JTextArea(report.toString());
-		textArea.setEditable(false);
-		JScrollPane scrollPane = new JScrollPane(textArea);
-		scrollPane.setPreferredSize(new Dimension(400, 300));
-
-		JOptionPane.showMessageDialog(null, scrollPane, "매출 보고서", JOptionPane.INFORMATION_MESSAGE);
+		salesDialog.setVisible(true);
 	}
 
-	private int countSoldCans(String date, String canName) {
-		return (int) salesManager.getSalesList().stream()
-				.filter(salesData -> salesData.getDate().equals(date) && salesData.getCanName().equals(canName))
-				.mapToInt(SalesData::getQuantitySold)
-				.sum();
+	private void showMonthlyReport() {
+		JDialog monthlyDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "월별 매출 보고서", true);
+		monthlyDialog.setSize(800, 600);
+		monthlyDialog.setLayout(new BorderLayout());
+
+		// 테이블 모델과 JTable 생성
+		String[] columnNames = {"월", "음료", "매출액", "판매량"};
+		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
+		JTable monthlyTable = new JTable(tableModel);
+		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+		monthlyTable.setRowSorter(sorter);
+
+		// 월별 데이터 계산 및 채우기
+		Map<String, Map<String, int[]>> monthlyData = new TreeMap<>(Collections.reverseOrder());
+
+		for (SalesData salesData : salesManager.getSalesList()) {
+			String month = salesData.getDate().substring(0, 7); // "yyyy-MM"
+			monthlyData.putIfAbsent(month, new HashMap<>());
+			monthlyData.get(month).putIfAbsent(salesData.getCanName(), new int[]{0, 0});
+			monthlyData.get(month).get(salesData.getCanName())[0] += salesData.getTotalSales();
+			monthlyData.get(month).get(salesData.getCanName())[1] += salesData.getQuantitySold();
+		}
+
+		for (String month : monthlyData.keySet()) {
+			for (String canName : monthlyData.get(month).keySet()) {
+				int[] data = monthlyData.get(month).get(canName);
+				tableModel.addRow(new Object[]{month, canName, data[0], data[1]});
+			}
+		}
+
+		JScrollPane scrollPane = new JScrollPane(monthlyTable);
+		monthlyDialog.add(scrollPane, BorderLayout.CENTER);
+
+		// 버튼 패널 생성
+		JPanel buttonPanel = new JPanel();
+		JButton sortByPriceButton = new JButton("매출액순 정렬");
+		JButton sortByVolumeButton = new JButton("판매량순 정렬");
+
+		buttonPanel.add(sortByPriceButton);
+		buttonPanel.add(sortByVolumeButton);
+		monthlyDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+		// 버튼 이벤트 리스너 추가
+		sortByPriceButton.addActionListener(e -> sorter.setSortKeys(Collections.singletonList(new RowSorter.SortKey(2, SortOrder.DESCENDING))));
+		sortByVolumeButton.addActionListener(e -> sorter.setSortKeys(Collections.singletonList(new RowSorter.SortKey(3, SortOrder.DESCENDING))));
+
+		monthlyDialog.setVisible(true);
 	}
 
 	@SuppressWarnings("unchecked")
