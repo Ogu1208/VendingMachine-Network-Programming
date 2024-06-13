@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.*;
@@ -286,10 +287,12 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 	}
 
 	private void showSalesReport() {
-		Map<String, Integer> dailySales = new HashMap<>();
-		Map<String, Integer> monthlySales = new HashMap<>();
-		Map<String, Map<String, Integer>> dailyCanSales = new HashMap<>();
-		Map<String, Map<String, Integer>> monthlyCanSales = new HashMap<>();
+		Map<String, Integer> dailySales = new LinkedHashMap<>();
+		Map<String, Integer> monthlySales = new LinkedHashMap<>();
+		Map<String, Map<String, Integer>> dailyCanSales = new LinkedHashMap<>();
+		Map<String, Map<String, Integer>> monthlyCanSales = new LinkedHashMap<>();
+		Map<String, Map<String, Integer>> dailyCanQuantity = new LinkedHashMap<>();
+		Map<String, Map<String, Integer>> monthlyCanQuantity = new LinkedHashMap<>();
 
 		for (SalesData salesData : salesManager.getSalesList()) {
 			String date = salesData.getDate();
@@ -302,50 +305,64 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 			monthlySales.put(month, monthlySales.getOrDefault(month, 0) + salesData.getTotalSales());
 
 			// 일별 음료 매출
-			dailyCanSales.putIfAbsent(date, new HashMap<>());
+			dailyCanSales.putIfAbsent(date, new LinkedHashMap<>());
 			dailyCanSales.get(date).put(salesData.getCanName(),
 					dailyCanSales.get(date).getOrDefault(salesData.getCanName(), 0) + salesData.getTotalSales());
 
 			// 월별 음료 매출
-			monthlyCanSales.putIfAbsent(month, new HashMap<>());
+			monthlyCanSales.putIfAbsent(month, new LinkedHashMap<>());
 			monthlyCanSales.get(month).put(salesData.getCanName(),
 					monthlyCanSales.get(month).getOrDefault(salesData.getCanName(), 0) + salesData.getTotalSales());
+
+			// 일별 음료 판매 개수
+			dailyCanQuantity.putIfAbsent(date, new LinkedHashMap<>());
+			dailyCanQuantity.get(date).put(salesData.getCanName(),
+					dailyCanQuantity.get(date).getOrDefault(salesData.getCanName(), 0) + salesData.getQuantitySold());
+
+			// 월별 음료 판매 개수
+			monthlyCanQuantity.putIfAbsent(month, new LinkedHashMap<>());
+			monthlyCanQuantity.get(month).put(salesData.getCanName(),
+					monthlyCanQuantity.get(month).getOrDefault(salesData.getCanName(), 0) + salesData.getQuantitySold());
 		}
 
 		StringBuilder report = new StringBuilder();
 
-		// 전체 일별 매출
-		report.append("전체 일별 매출:\n");
-		for (String date : dailySales.keySet()) {
-			report.append(date).append(": ").append(dailySales.get(date)).append("원\n");
-		}
-		report.append("\n");
-
 		// 전체 월별 매출
 		report.append("전체 월별 매출:\n");
-		for (String month : monthlySales.keySet()) {
-			report.append(month).append(": ").append(monthlySales.get(month)).append("원\n");
-		}
-		report.append("\n");
-
-		// 각 음료의 일별 매출
-		report.append("각 음료의 일별 매출:\n");
-		for (String date : dailyCanSales.keySet()) {
-			report.append(date).append(":\n");
-			for (String canName : dailyCanSales.get(date).keySet()) {
-				report.append("  ").append(canName).append(": ").append(dailyCanSales.get(date).get(canName)).append("원\n");
-			}
-		}
+		monthlySales.entrySet().stream()
+				.sorted(Map.Entry.<String, Integer>comparingByKey().reversed())
+				.forEach(entry -> report.append(entry.getKey()).append(": ").append(entry.getValue()).append("원\n"));
 		report.append("\n");
 
 		// 각 음료의 월별 매출
 		report.append("각 음료의 월별 매출:\n");
-		for (String month : monthlyCanSales.keySet()) {
-			report.append(month).append(":\n");
-			for (String canName : monthlyCanSales.get(month).keySet()) {
-				report.append("  ").append(canName).append(": ").append(monthlyCanSales.get(month).get(canName)).append("원\n");
-			}
-		}
+		monthlyCanSales.entrySet().stream()
+				.sorted(Map.Entry.<String, Map<String, Integer>>comparingByKey().reversed())
+				.forEach(entry -> {
+					report.append(entry.getKey()).append(":\n");
+					entry.getValue().forEach((canName, sales) ->
+							report.append("  ").append(canName).append(": ").append(sales).append("원 (")
+									.append(monthlyCanQuantity.get(entry.getKey()).get(canName)).append("개)\n"));
+				});
+		report.append("\n");
+
+		// 전체 일별 매출
+		report.append("전체 일별 매출:\n");
+		dailySales.entrySet().stream()
+				.sorted(Map.Entry.<String, Integer>comparingByKey().reversed())
+				.forEach(entry -> report.append(entry.getKey()).append(": ").append(entry.getValue()).append("원\n"));
+		report.append("\n");
+
+		// 각 음료의 일별 매출
+		report.append("각 음료의 일별 매출:\n");
+		dailyCanSales.entrySet().stream()
+				.sorted(Map.Entry.<String, Map<String, Integer>>comparingByKey().reversed())
+				.forEach(entry -> {
+					report.append(entry.getKey()).append(":\n");
+					entry.getValue().forEach((canName, sales) ->
+							report.append("  ").append(canName).append(": ").append(sales).append("원 (")
+									.append(dailyCanQuantity.get(entry.getKey()).get(canName)).append("개)\n"));
+				});
 
 		JTextArea textArea = new JTextArea(report.toString());
 		textArea.setEditable(false);
@@ -353,6 +370,13 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		scrollPane.setPreferredSize(new Dimension(400, 300));
 
 		JOptionPane.showMessageDialog(null, scrollPane, "매출 보고서", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	private int countSoldCans(String date, String canName) {
+		return (int) salesManager.getSalesList().stream()
+				.filter(salesData -> salesData.getDate().equals(date) && salesData.getCanName().equals(canName))
+				.mapToInt(SalesData::getQuantitySold)
+				.sum();
 	}
 
 	@SuppressWarnings("unchecked")

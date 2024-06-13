@@ -1,12 +1,13 @@
 package util;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class SalesManager {
-
-
 
     private static final String SALES_DATA_FILE = "sales_data.dat";
     private static final String INITIAL_SALES_DATA_FILE = "initial_sales_data.dat";
@@ -39,6 +40,7 @@ public class SalesManager {
     private void loadSalesData() {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(SALES_DATA_FILE))) {
             salesList = (List<SalesData>) ois.readObject();
+            Collections.sort(salesList);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -49,8 +51,10 @@ public class SalesManager {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(INITIAL_SALES_DATA_FILE))) {
             List<SalesData> initialData = (List<SalesData>) ois.readObject();
             salesList.addAll(initialData);
+            Collections.sort(salesList);
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 }
+

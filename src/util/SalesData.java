@@ -6,19 +6,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class SalesData implements Serializable {
+public class SalesData implements Serializable, Comparable<SalesData>{
     private static final long serialVersionUID = 1L;
     private String canName;
     private int quantitySold;
     private int totalSales;
     private String date;
-
-//    public SalesData(String canName, int quantitySold, int totalSales) {
-//        this.canName = canName;
-//        this.quantitySold = quantitySold;
-//        this.totalSales = totalSales;
-//        this.date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-//    }
 
     public SalesData(String canName, int quantitySold, int totalSales) {
         this(canName, quantitySold, totalSales, new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
@@ -73,5 +66,10 @@ public class SalesData implements Serializable {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    @Override
+    public int compareTo(SalesData o) {
+        return o.date.compareTo(this.date);
     }
 }
