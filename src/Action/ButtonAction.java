@@ -109,7 +109,7 @@ public class ButtonAction implements ActionListener {
 							}
 
 							// 매출 데이터 업데이트
-							salesManager.addSale(new SalesData(can.getCanName(), 1, can.getCanPrice()));
+							salesManager.addSales(new SalesData(can.getCanName(), 1, can.getCanPrice()));
 
 						} else { // 재고가 없으면
 							JOptionPane.showMessageDialog(new JFrame(), "품절입니다");

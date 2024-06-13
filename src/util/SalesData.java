@@ -13,11 +13,22 @@ public class SalesData implements Serializable {
     private int totalSales;
     private String date;
 
+//    public SalesData(String canName, int quantitySold, int totalSales) {
+//        this.canName = canName;
+//        this.quantitySold = quantitySold;
+//        this.totalSales = totalSales;
+//        this.date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+//    }
+
     public SalesData(String canName, int quantitySold, int totalSales) {
+        this(canName, quantitySold, totalSales, new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+    }
+
+    public SalesData(String canName, int quantitySold, int totalSales, String date) {
         this.canName = canName;
         this.quantitySold = quantitySold;
         this.totalSales = totalSales;
-        this.date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        this.date = date;
     }
 
     // Getters and setters
