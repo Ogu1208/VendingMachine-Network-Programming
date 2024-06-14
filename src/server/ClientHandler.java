@@ -52,6 +52,15 @@ public class ClientHandler extends Thread {
                     VendingMachineData clientData = dataManager.getClientData(clientId);
                     clientData.addSale(canName, quantity, date);
                     log(clientId + " 판매 - 음료: " + canName + ", 수량: " + quantity + ", 날짜: " + date);
+
+                } else if (request.startsWith("INVENTORY_UPDATE:")) {
+                    String[] parts = request.split(":");
+                    String canName = parts[1];
+                    int quantity = Integer.parseInt(parts[2]);
+
+                    VendingMachineData clientData = dataManager.getClientData(clientId);
+                    clientData.updateInventory(canName, quantity);
+                    log(clientId + " 재고 업데이트 - 음료: " + canName + ", 수량: " + quantity);
                 }
 
                 out.writeObject("OK");

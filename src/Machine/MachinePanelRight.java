@@ -22,6 +22,7 @@ import Can.Can;
 import Coin.CoinArray;
 import Coin.Coin;
 import Person.Admin;
+import client.ClientInterface;
 import util.SalesData;
 import util.SalesManager;
 
@@ -30,6 +31,7 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 
 	private static final String INVENTORY_DATA_FILE = "inventory_data.dat";
 	private SalesManager salesManager;
+	private ClientInterface client;
 	JTextField adminPass, changePW, collectMoney;
 	JPanel canAdminPanel, moneyAdminPanel, moneyTotalPanel, PWPanel, collectPanel;
 	JButton btnAdminIn, btnAddCanStart, btnAddCan, salesReportButton;
@@ -38,12 +40,13 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 	DefaultTableModel canModel, moneyModel;
 	public static JLabel totalMoneyLabel, PWLabel, collectLabel, totalBalanceLabel;
 	public static JTable canTable, moneyTable;
-	MachinePanelLeft panelLeft;
+	private MachinePanelLeft panelLeft;
 
-	public MachinePanelRight(String password, MachinePanelLeft panelLeft, SalesManager salesManager) {
+	public MachinePanelRight(String password, MachinePanelLeft panelLeft, SalesManager salesManager, ClientInterface client) {
 		this.password = password;
 		this.panelLeft = panelLeft;
 		this.salesManager = salesManager;
+		this.client = client;
 
 		setPreferredSize(new Dimension(280, 630));
 
@@ -68,7 +71,7 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		canAdminPanel.setVisible(false);
 
 		for (int i = 0; i < CanArray.canList.size(); i++) {
-			String arr[] = {CanArray.canList.get(i).getCanName(),
+			String[] arr = {CanArray.canList.get(i).getCanName(),
 					Integer.toString(CanArray.canList.get(i).getCanNum()),
 					Integer.toString(CanArray.canList.get(i).getCanPrice())};
 			canModel.addRow(arr);
@@ -94,7 +97,7 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		moneyModel = (DefaultTableModel) moneyTable.getModel();
 
 		for (int i = 0; i < CoinArray.coinList.size(); i++) {
-			String arr[] = {CoinArray.coinList.get(i).getCoinName(),
+			String[] arr = {CoinArray.coinList.get(i).getCoinName(),
 					Integer.toString(CoinArray.coinList.get(i).getCoinNum())};
 			moneyModel.addRow(arr);
 		}
@@ -190,6 +193,10 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		loadInventoryData();
 	}
 
+	public void setPanelLeft(MachinePanelLeft panelLeft) {
+		this.panelLeft = panelLeft;
+	}
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (!canAdminPanel.isVisible()) {
@@ -236,13 +243,16 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 				if (column == 0) { // 이름 변경
 					CanArray.canList.get(row).setCanName((String) canModel.getValueAt(row, column));
 				} else if (column == 1) { // 재고 변경
-					CanArray.canList.get(row).setCanNum(Integer.parseInt((String) canModel.getValueAt(row, column)));
+					int newQuantity = Integer.parseInt((String) canModel.getValueAt(row, column));
+					CanArray.canList.get(row).setCanNum(newQuantity);
+					client.sendInventoryUpdate(CanArray.canList.get(row).getCanName(), newQuantity);
 				} else if (column == 2) { // 가격 변경
 					CanArray.canList.get(row).setCanPrice(Integer.parseInt((String) canModel.getValueAt(row, column)));
 				}
 
 				panelLeft.updateCanLabels();
 				panelLeft.updateCanButtons();
+				panelLeft.updateButtonColors();
 			}
 		});
 
@@ -259,6 +269,14 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 				updateTotalBalanceLabel();
 			}
 		});
+	}
+
+	public void updateCanLabels() {
+		for (int i = 0; i < canTable.getRowCount(); i++) {
+			int canNum = (int) canTable.getValueAt(i, 1);
+			CanArray.canList.get(i).setCanNum(canNum);
+		}
+		panelLeft.updateCanLabels();
 	}
 
 	public static void updateTotalBalanceLabel() {
@@ -283,6 +301,15 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		for (Coin coin : CoinArray.coinList) {
 			String[] row = {coin.getCoinName(), String.valueOf(coin.getCoinNum())};
 			moneyModel.addRow(row);
+		}
+	}
+
+	public static void updateCanTable() {
+		DefaultTableModel canModel = (DefaultTableModel) canTable.getModel();
+		canModel.setRowCount(0);
+		for (Can can : CanArray.canList) {
+			String[] row = {can.getCanName(), String.valueOf(can.getCanNum()), String.valueOf(can.getCanPrice())};
+			canModel.addRow(row);
 		}
 	}
 
@@ -397,5 +424,4 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 			e.printStackTrace();
 		}
 	}
-
 }

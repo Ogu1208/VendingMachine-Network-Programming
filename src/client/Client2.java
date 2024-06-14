@@ -40,6 +40,7 @@ public class Client2 extends JFrame implements ClientInterface {
         }
     }
 
+
     private void sendRequest(String request) {
         try {
             out.writeObject(request);
@@ -61,6 +62,11 @@ public class Client2 extends JFrame implements ClientInterface {
     @Override
     public void sendSale(String canName, int quantity) {
         sendRequest("SALE:" + canName + ":" + quantity);
+    }
+
+    @Override
+    public void sendInventoryUpdate(String canName, int quantity) {
+        sendRequest("INVENTORY_UPDATE:" + canName + ":" + quantity);
     }
 
     public static void main(String[] args) {

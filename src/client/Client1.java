@@ -40,6 +40,16 @@ public class Client1 extends JFrame implements ClientInterface {
         }
     }
 
+    @Override
+    public void sendSale(String canName, int quantity) {
+        sendRequest("SALE:" + canName + ":" + quantity);
+    }
+
+    @Override
+    public void sendInventoryUpdate(String canName, int quantity) {
+        sendRequest("INVENTORY_UPDATE:" + canName + ":" + quantity);
+    }
+
     private void sendRequest(String request) {
         try {
             out.writeObject(request);
@@ -58,14 +68,10 @@ public class Client1 extends JFrame implements ClientInterface {
         SwingUtilities.invokeLater(() -> logArea.append(message + "\n"));
     }
 
-    @Override
-    public void sendSale(String canName, int quantity) {
-        sendRequest("SALE:" + canName + ":" + quantity);
-    }
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new MachineFrame("Ogu1208!", new Client1());
+            Client1 client = new Client1();
+            new MachineFrame("Ogu1208!", client);
         });
     }
 }

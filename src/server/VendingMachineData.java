@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class VendingMachineData {
     public Map<String, Integer> inventory;
     public Map<String, Map<String, Integer>> dailySales;
@@ -34,5 +37,9 @@ public class VendingMachineData {
         String month = date.substring(0, 7);
         monthlySales.putIfAbsent(month, new HashMap<>());
         monthlySales.get(month).put(canName, monthlySales.get(month).getOrDefault(canName, 0) + quantity);
+    }
+
+    public void updateInventory(String canName, int quantity) {
+        inventory.put(canName, quantity);
     }
 }

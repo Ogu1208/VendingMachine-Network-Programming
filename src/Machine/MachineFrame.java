@@ -35,7 +35,6 @@ public class MachineFrame extends JFrame {
 		CanArray.canList.add(new Can("고급커피", 10, 700));
 		CanArray.canList.add(new Can("탄산음료", 10, 750));
 		CanArray.canList.add(new Can("특화음료", 10, 800));
-
 		// 잔돈 초기화
 		CoinArray.coinList.add(new Coin("1000", 10));
 		CoinArray.coinList.add(new Coin("500", 10));
@@ -47,20 +46,15 @@ public class MachineFrame extends JFrame {
 		setTitle("자판기 관리 프로그램");
 		setPreferredSize(new Dimension(650, 630));
 		setLocation(400, 150);
-		WindowListener win = new WindowAdapter() {
-			@Override
-			public void windowClosing(WindowEvent e) {
-				super.windowClosing(e);
-				System.exit(0);
-			}
-		};
-		addWindowListener(win);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		// 자판기 왼쪽 판넬과 오른쪽 판넬 구성
 		Container contentPanel = getContentPane();
 
-		MachinePanelLeft panelLeft = new MachinePanelLeft(salesManager, client);
-		MachinePanelRight panelRight = new MachinePanelRight(password, panelLeft, salesManager);
+		MachinePanelRight panelRight = new MachinePanelRight(password, null, salesManager, client); // 임시로 null 전달
+		MachinePanelLeft panelLeft = new MachinePanelLeft(salesManager, client, panelRight);
+
+		panelRight.setPanelLeft(panelLeft); // 오른쪽 패널에 왼쪽 패널 설정
 
 		contentPanel.add(panelRight, BorderLayout.EAST);
 		contentPanel.add(panelLeft, BorderLayout.CENTER);

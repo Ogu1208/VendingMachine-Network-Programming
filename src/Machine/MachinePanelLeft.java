@@ -25,15 +25,20 @@ public class MachinePanelLeft extends JPanel {
 	List<JLabel> canLabels;
 	SalesManager salesManager;
 	ClientInterface client;
+	MachinePanelRight panelRight;
+	private int currentMoney = 0;
+	private int billCount = 0;
+	private static final int MAX_BILLS = 5;
 
-	public MachinePanelLeft(SalesManager salesManager, ClientInterface client) {
+	public MachinePanelLeft(SalesManager salesManager, ClientInterface client, MachinePanelRight panelRight) {
 		this.salesManager = salesManager;
 		this.client = client;
+		this.panelRight = panelRight;
 
 		// 좌측 자판기 판넬
 		setPreferredSize(new Dimension(320, 630));
-		blist = new ArrayList<JButton>();   // 버튼 리스트
-		canLabels = new ArrayList<JLabel>(); // 라벨 리스트
+		blist = new ArrayList<>();   // 버튼 리스트
+		canLabels = new ArrayList<>(); // 라벨 리스트
 
 		// ------------<돈 입출구>-----------//
 		JPanel moneyPanel = new JPanel();   // 돈 출입구 판넬(가장 큰 틀)
@@ -44,7 +49,12 @@ public class MachinePanelLeft extends JPanel {
 		JButton takeMoneyButton = new JButton(new ImageIcon("return.png"));  // 반환 버튼 이미지아이콘
 		takeMoneyButton.setBorder(BorderFactory.createEmptyBorder());
 		takeMoneyButton.setContentAreaFilled(false);
-		takeMoneyButton.addActionListener(new ReturnMoney(takeMoneytext, getCan, blist)); // 버튼 액션
+		takeMoneyButton.addActionListener(e -> {
+			currentMoney = 0;
+			billCount = 0;
+			takeMoneytext.setText("0");
+			updateButtonColors();
+		}); // 반환 버튼 액션
 
 		// 투입구
 		JPanel putMoneyPanel = new JPanel();
@@ -87,25 +97,33 @@ public class MachinePanelLeft extends JPanel {
 			JLabel canLabel = new JLabel(CanArray.canList.get(i).getCanPrice() + "원");
 			canLabels.add(canLabel); // 라벨 리스트에 추가
 			canButton = new JButton(CanArray.canList.get(i).getCanName());
-			int index = i; // 변수 캡쳐
-			canButton.addActionListener(new ButtonAction(takeMoneytext, getCan, blist, salesManager) {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					int currentMoney = Integer.parseInt(takeMoneytext.getText());
-					Can can = CanArray.canList.get(index);
-					if (currentMoney >= can.getCanPrice()) {
-						int quantity = 1; // 예시로 1개 판매
-						can.setCanNum(can.getCanNum() - quantity);
-						salesManager.addSales(new SalesData(can.getCanName(), quantity, can.getCanPrice()));
-						client.sendSale(can.getCanName(), quantity);
-						takeMoneytext.setText(String.valueOf(currentMoney - can.getCanPrice()));
-					} else {
-						JOptionPane.showMessageDialog(null, "투입된 돈이 부족합니다.");
-					}
+			canButton.setForeground(new Color(0, 0, 0));  // 음료 텍스트 색상
+
+			int index = i;  // 추가된 부분: 인덱스를 final처럼 사용하기 위해
+
+			// 판매 버튼 클릭 시 클라이언트에 판매 정보 전송 및 재고 감소
+			canButton.addActionListener(e -> {
+				int quantity = 1; // 예시로 1개 판매
+				Can can = CanArray.canList.get(index);
+				int currentStock = can.getCanNum();
+				int canPrice = can.getCanPrice();
+				if (currentMoney >= canPrice && currentStock >= quantity) {
+					can.setCanNum(currentStock - quantity);
+					currentMoney -= canPrice;
+					takeMoneytext.setText(String.valueOf(currentMoney));
+					salesManager.addSales(new SalesData(can.getCanName(), quantity, canPrice));
+					client.sendSale(can.getCanName(), quantity);
+					panelRight.updateCanTable();  // 오른쪽 패널 업데이트
+					panelRight.updateCanLabels(); // 오른쪽 패널 라벨 업데이트
+					panelRight.updateTotalBalanceLabel(); // 오른쪽 패널 총 잔고 업데이트
+					updateButtonColors();  // 버튼 색상 업데이트
+				} else if (currentMoney < canPrice) {
+					JOptionPane.showMessageDialog(this, "투입한 금액이 부족합니다.", "오류", JOptionPane.ERROR_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(this, "재고가 부족합니다.", "오류", JOptionPane.ERROR_MESSAGE);
 				}
 			});
-			canButton.setForeground(new Color(0, 0, 0));  // 음료 텍스트 색상
-			canButton.setBackground(new Color(255, 255, 255));  // 음료 버튼 색상
+
 			canEach.add(new JLabel(new ImageIcon(i + ".png")));  // 음료 이미지
 			canEach.add(canLabel);  // 음료 이름
 			canEach.add(canButton);
@@ -124,6 +142,8 @@ public class MachinePanelLeft extends JPanel {
 		putMoneyPanel.setBackground(new Color(70, 152, 64));
 		getCanPanel.setBackground(new Color(70, 152, 64));
 		setBackground(new Color(70, 152, 64));
+
+		updateButtonColors();
 	}
 
 	private List<JButton> createCoinButtons(List<JButton> blist) {
@@ -132,7 +152,11 @@ public class MachinePanelLeft extends JPanel {
 
 		for (int value : coinValues) {
 			JButton button = new JButton(value + "원");
-			button.addActionListener(new CoinButtonAction(value, takeMoneytext, blist));
+			button.addActionListener(e -> {
+				currentMoney += value;
+				takeMoneytext.setText(String.valueOf(currentMoney));
+				updateButtonColors();
+			});
 			buttons.add(button);
 		}
 
@@ -145,7 +169,16 @@ public class MachinePanelLeft extends JPanel {
 
 		for (int value : billValues) {
 			JButton button = new JButton(value + "원");
-			button.addActionListener(new BillButtonAction(value, takeMoneytext, blist));
+			button.addActionListener(e -> {
+				if (billCount < MAX_BILLS) {
+					currentMoney += value;
+					billCount++;
+					takeMoneytext.setText(String.valueOf(currentMoney));
+					updateButtonColors();
+				} else {
+					JOptionPane.showMessageDialog(this, "1000원 지폐는 5개까지만 투입 가능합니다.", "오류", JOptionPane.ERROR_MESSAGE);
+				}
+			});
 			buttons.add(button);
 		}
 
@@ -165,6 +198,21 @@ public class MachinePanelLeft extends JPanel {
 			JButton button = blist.get(i);
 			String canName = CanArray.canList.get(i).getCanName();
 			button.setText(canName);
+		}
+	}
+
+	public void updateButtonColors() {
+		for (int i = 0; i < blist.size(); i++) {
+			JButton button = blist.get(i);
+			int stock = CanArray.canList.get(i).getCanNum();
+			int price = CanArray.canList.get(i).getCanPrice();
+			if (stock == 0) {
+				button.setBackground(new Color(204, 61, 61));
+			} else if (currentMoney >= price) {
+				button.setBackground(new Color(20, 175, 100));
+			} else {
+				button.setBackground(Color.WHITE);
+			}
 		}
 	}
 }
