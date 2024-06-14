@@ -24,7 +24,12 @@ public class InitialSalesDataGenerator {
                 for (int i = 0; i < canNames.length; i++) {
                     int quantitySold = (int) (Math.random() * 10) + 1; // 1에서 10 사이의 임의의 판매량
                     int totalSales = quantitySold * prices[i];
-                    initialSalesData.add(new SalesData(canNames[i], quantitySold, totalSales, date));
+                    initialSalesData.add(new SalesData("client1", canNames[i], quantitySold, totalSales, date));
+                }
+                for (int i = 0; i < canNames.length; i++) {
+                    int quantitySold = (int) (Math.random() * 10) + 1; // 1에서 10 사이의 임의의 판매량
+                    int totalSales = quantitySold * prices[i];
+                    initialSalesData.add(new SalesData("client2", canNames[i], quantitySold, totalSales, date));
                 }
             }
         }

@@ -20,14 +20,17 @@ import util.SalesManager;
 
 public class MachinePanelLeft extends JPanel {
 
-	JButton getCan, canButton;
-	JTextField takeMoneytext;
-	List<JButton> blist;
-	List<JLabel> canLabels;
-	SalesManager salesManager;
+	private JTextField takeMoneytext;
+	private JButton getCan;
+	private List<JButton> blist;
+	private List<JLabel> canLabels;
+	private SalesManager salesManager;
+	private String clientId;
 
-	public MachinePanelLeft(SalesManager salesManager) {
+
+	public MachinePanelLeft(SalesManager salesManager, String clientId) {
 		this.salesManager = salesManager;
+		this.clientId = clientId;
 
 		// 좌측 자판기 판넬
 		setPreferredSize(new Dimension(320, 630));
@@ -85,8 +88,8 @@ public class MachinePanelLeft extends JPanel {
 			JPanel canEach = new JPanel();
 			JLabel canLabel = new JLabel(CanArray.canList.get(i).getCanPrice() + "원");
 			canLabels.add(canLabel); // 라벨 리스트에 추가
-			canButton = new JButton(CanArray.canList.get(i).getCanName());
-			canButton.addActionListener(new ButtonAction(takeMoneytext, getCan, blist, salesManager));
+			JButton canButton = new JButton(CanArray.canList.get(i).getCanName());
+			canButton.addActionListener(new ButtonAction(takeMoneytext, getCan, blist, salesManager, clientId));
 			canButton.setForeground(new Color(0, 0, 0));  // 음료 텍스트 색상
 			canButton.setBackground(new Color(255, 255, 255));  // 음료 버튼 색상
 			canEach.add(new JLabel(new ImageIcon(i + ".png")));  // 음료 이미지

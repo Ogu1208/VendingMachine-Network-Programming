@@ -22,6 +22,7 @@ import Can.Can;
 import Coin.CoinArray;
 import Coin.Coin;
 import Person.Admin;
+import reports.SalesTableModel;
 import util.SalesData;
 import util.SalesManager;
 
@@ -39,6 +40,8 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 	public static JLabel totalMoneyLabel, PWLabel, collectLabel, totalBalanceLabel;
 	public static JTable canTable, moneyTable;
 	MachinePanelLeft panelLeft;
+	private SalesTableModel tableModel;
+	private JTable salesTable;
 
 	public MachinePanelRight(String password, MachinePanelLeft panelLeft, SalesManager salesManager) {
 		this.password = password;
@@ -292,17 +295,15 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		salesDialog.setLayout(new BorderLayout());
 
 		// 테이블 모델과 JTable 생성
-		String[] columnNames = {"날짜", "음료", "매출액", "판매량"};
-		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-		JTable salesTable = new JTable(tableModel);
-		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
+		tableModel = new SalesTableModel();
+		salesTable = new JTable(tableModel);
+		TableRowSorter<SalesTableModel> sorter = new TableRowSorter<>(tableModel);
 		salesTable.setRowSorter(sorter);
 
 		// 데이터 채우기
 		List<SalesData> salesDataList = salesManager.getSalesList();
-		salesDataList.sort(Comparator.comparing(SalesData::getDate).reversed());
 		for (SalesData salesData : salesDataList) {
-			tableModel.addRow(new Object[]{salesData.getDate(), salesData.getCanName(), salesData.getTotalSales(), salesData.getQuantitySold()});
+			tableModel.addSalesData(salesData);
 		}
 
 		JScrollPane scrollPane = new JScrollPane(salesTable);
@@ -336,11 +337,10 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		monthlyDialog.setLayout(new BorderLayout());
 
 		// 테이블 모델과 JTable 생성
-		String[] columnNames = {"월", "음료", "매출액", "판매량"};
-		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
-		JTable monthlyTable = new JTable(tableModel);
-		TableRowSorter<DefaultTableModel> sorter = new TableRowSorter<>(tableModel);
-		monthlyTable.setRowSorter(sorter);
+		tableModel = new SalesTableModel();
+		salesTable = new JTable(tableModel);
+		TableRowSorter<SalesTableModel> sorter = new TableRowSorter<>(tableModel);
+		salesTable.setRowSorter(sorter);
 
 		// 월별 데이터 계산 및 채우기
 		Map<String, Map<String, int[]>> monthlyData = new TreeMap<>(Collections.reverseOrder());
@@ -360,7 +360,7 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 			}
 		}
 
-		JScrollPane scrollPane = new JScrollPane(monthlyTable);
+		JScrollPane scrollPane = new JScrollPane(salesTable);
 		monthlyDialog.add(scrollPane, BorderLayout.CENTER);
 
 		// 버튼 패널 생성

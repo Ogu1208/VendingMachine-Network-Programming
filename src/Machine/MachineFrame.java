@@ -19,7 +19,7 @@ import util.SalesManager;
 
 public class MachineFrame extends JFrame {
 	// 자판기의 전체적인 틀
-	public MachineFrame(String password) {
+	public MachineFrame(String password, String clientId) {
 		Admin.setPassword(password);
 		SalesManager salesManager = new SalesManager();
 		// 음료 초기화
@@ -52,7 +52,7 @@ public class MachineFrame extends JFrame {
 		// 자판기 왼쪽 판넬과 오른쪽 판넬 구성
 		Container contentPanel = getContentPane();
 
-		MachinePanelLeft panelLeft = new MachinePanelLeft(salesManager);
+		MachinePanelLeft panelLeft = new MachinePanelLeft(salesManager, clientId);
 		MachinePanelRight panelRight = new MachinePanelRight(password, panelLeft, salesManager);
 
 		contentPanel.add(panelRight, BorderLayout.EAST);

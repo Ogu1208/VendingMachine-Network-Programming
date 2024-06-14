@@ -2,23 +2,24 @@ package Can;
 
 //음료 클래스
 
-public class Can {
+import java.io.Serial;
+import java.io.Serializable;
 
-	String canName;  // 음료 이름
-	int canNum;  // 음료 개수
-	int canPrice;  // 음료 가격
+public class Can implements Serializable {
+	private static final long serialVersionUID = 1L;
+	private String canName;
+	private int canNum;
+	private int canPrice;
 
 	public Can(String canName, int canNum, int canPrice) {
-		super();
 		this.canName = canName;
 		this.canNum = canNum;
 		this.canPrice = canPrice;
-
 	}
 
 	@Override
 	public String toString() {
-		return "[음료 이름 : " + canName + ", 음료 개수 : " + canNum + " 음료 가격 : " + canPrice + "]";
+		return "[음료 이름 : " + canName + ", 음료 개수 : " + canNum + ", 음료 가격 : " + canPrice + "]";
 	}
 
 	public String getCanName() {
