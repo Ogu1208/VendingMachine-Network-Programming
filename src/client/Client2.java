@@ -32,6 +32,9 @@ public class Client2 extends JFrame implements ClientInterface {
 
             sendRequest("REGISTER:Client2");
 
+            // 서버로 데이터 전송 예시
+            sendRequest("GET_STATUS");
+
         } catch (IOException e) {
             log("서버 연결 오류: " + e.getMessage());
         }

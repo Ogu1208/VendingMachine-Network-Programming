@@ -10,7 +10,7 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-class ClientHandler extends Thread {
+public class ClientHandler extends Thread {
     private Socket socket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
@@ -40,7 +40,7 @@ class ClientHandler extends Thread {
 
                 if (request.startsWith("REGISTER:")) {
                     clientId = request.split(":")[1];
-                    dataManager.registerClient(clientId, CanArray.canList);
+                    dataManager.registerClient(clientId);
                     log(clientId + " µî·ÏµÊ");
 
                 } else if (request.startsWith("SALE:")) {
