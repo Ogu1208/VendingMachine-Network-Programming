@@ -12,9 +12,8 @@ public class Client2 extends JFrame implements ClientInterface {
     private static final int SERVER_PORT = 12345;
     private JTextArea logArea;
     private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
-    private MachineFrame machineFrame;
+    private ObjectOutputStream out;
+    private ObjectInputStream in;
 
     public Client2() {
         setTitle("자판기 클라이언트 2");
@@ -27,42 +26,43 @@ public class Client2 extends JFrame implements ClientInterface {
 
         try {
             socket = new Socket(SERVER_ADDRESS, SERVER_PORT);
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "MS949"));
-            out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "MS949"), true);
+            out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
             log("서버에 연결됨: " + SERVER_ADDRESS + ":" + SERVER_PORT);
 
-            out.println("Client2");
-            new Thread(() -> {
-                try {
-                    String message;
-                    while ((message = in.readLine()) != null) {
-                        log("서버로부터 메시지: " + message);
-                    }
-                } catch (IOException e) {
-                    log("서버 연결 오류: " + e.getMessage());
-                }
-            }).start();
-
-            SwingUtilities.invokeLater(() -> {
-                machineFrame = new MachineFrame("Ogu1208!", this);
-            });
+            sendRequest("REGISTER:Client2");
 
         } catch (IOException e) {
             log("서버 연결 오류: " + e.getMessage());
         }
     }
 
-    @Override
-    public void sendSale(String canName, int quantity) {
-        out.println("SALE:" + canName + ":" + quantity);
-        log("판매 정보 전송: " + canName + ", 수량: " + quantity);
+    private void sendRequest(String request) {
+        try {
+            out.writeObject(request);
+            out.flush();
+            log("서버로 요청 전송: " + request);
+
+            String response = (String) in.readObject();
+            log("서버로부터 응답 받음: " + response);
+
+        } catch (IOException | ClassNotFoundException e) {
+            log("서버 요청 처리 중 오류: " + e.getMessage());
+        }
     }
 
     private void log(String message) {
         SwingUtilities.invokeLater(() -> logArea.append(message + "\n"));
     }
 
+    @Override
+    public void sendSale(String canName, int quantity) {
+        sendRequest("SALE:" + canName + ":" + quantity);
+    }
+
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(Client2::new);
+        SwingUtilities.invokeLater(() -> {
+            new MachineFrame("Ogu1208!", new Client2());
+        });
     }
 }

@@ -1,5 +1,7 @@
 package server;
 
+import Can.CanArray;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -14,106 +16,78 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ServerMain extends JFrame {
-    private static final int PORT = 12345;
-    private static final Map<String, ClientHandler> clients = new ConcurrentHashMap<>();
-    private static final DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Client", "Message"}, 0);
+    private ServerSocket serverSocket;
+    private JTextArea logArea;
+    private ServerDataManager dataManager;
 
     public ServerMain() {
-        setTitle("자판기 관리 서버");
-        setSize(600, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
+        createGUI();
+        dataManager = new ServerDataManager();
 
-        JTable table = new JTable(tableModel);
-        add(new JScrollPane(table), BorderLayout.CENTER);
+        new Thread(() -> {
+            try {
+                serverSocket = new ServerSocket(12345);
+                log("서버 시작됨: 포트 12345");
+
+                while (true) {
+                    Socket socket = serverSocket.accept();
+                    new ClientHandler(socket, dataManager, logArea).start();
+                }
+            } catch (IOException e) {
+                log("서버 오류: " + e.getMessage());
+            }
+        }).start();
+    }
+
+    private void createGUI() {
+        setTitle("자판기 관리 서버");
+        setSize(600, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        logArea = new JTextArea();
+        logArea.setEditable(false);
+        add(new JScrollPane(logArea), BorderLayout.CENTER);
+
+        // 클라이언트 데이터 확인 버튼
+        JButton checkDataButton = new JButton("클라이언트 데이터 확인");
+        checkDataButton.addActionListener(e -> showClientData());
+        add(checkDataButton, BorderLayout.SOUTH);
 
         setVisible(true);
     }
 
+    private void showClientData() {
+        JFrame dataFrame = new JFrame("클라이언트 데이터");
+        dataFrame.setSize(600, 400);
+        JTextArea dataArea = new JTextArea();
+        dataArea.setEditable(false);
+        dataFrame.add(new JScrollPane(dataArea), BorderLayout.CENTER);
+
+        for (String clientId : dataManager.clientData.keySet()) {
+            VendingMachineData data = dataManager.getClientData(clientId);
+            dataArea.append("클라이언트: " + clientId + "\n");
+            dataArea.append("재고 현황:\n");
+            for (String canName : data.inventory.keySet()) {
+                dataArea.append(canName + ": " + data.inventory.get(canName) + "\n");
+            }
+            dataArea.append("일별 매출:\n");
+            for (String date : data.dailySales.keySet()) {
+                dataArea.append(date + ": " + data.dailySales.get(date).toString() + "\n");
+            }
+            dataArea.append("월별 매출:\n");
+            for (String month : data.monthlySales.keySet()) {
+                dataArea.append(month + ": " + data.monthlySales.get(month).toString() + "\n");
+            }
+            dataArea.append("\n");
+        }
+
+        dataFrame.setVisible(true);
+    }
+
+    private void log(String message) {
+        SwingUtilities.invokeLater(() -> logArea.append(message + "\n"));
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(ServerMain::new);
-
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("서버가 시작되었습니다. 포트: " + PORT);
-
-            while (true) {
-                Socket socket = serverSocket.accept();
-                System.out.println("클라이언트 연결됨: " + socket.getInetAddress());
-
-                ClientHandler clientHandler = new ClientHandler(socket);
-                new Thread(clientHandler).start();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void updateTable(String clientName, String message) {
-        SwingUtilities.invokeLater(() -> {
-            tableModel.addRow(new Object[]{clientName, message});
-        });
-    }
-
-    static class ClientHandler implements Runnable {
-        private final Socket socket;
-        private BufferedReader in;
-        private PrintWriter out;
-        private String clientName;
-
-        public ClientHandler(Socket socket) {
-            this.socket = socket;
-            try {
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream(), "MS949"));
-                out = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "MS949"), true);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void run() {
-            try {
-                clientName = in.readLine();
-                clients.put(clientName, this);
-                String message;
-                while ((message = in.readLine()) != null) {
-                    System.out.println("클라이언트로부터 메시지: " + message);
-                    updateTable(clientName, message);
-                    processMessage(message);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                try {
-                    socket.close();
-                    clients.remove(clientName);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        private void processMessage(String message) {
-            String[] parts = message.split(":");
-            String command = parts[0];
-
-            switch (command) {
-                case "SALE":
-                    handleSale(parts[1], Integer.parseInt(parts[2]));
-                    break;
-                // 다른 명령어 처리 추가
-            }
-        }
-
-        private void handleSale(String canName, int quantity) {
-            String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-            String logMessage = String.format("판매 - 음료: %s, 수량: %d, 날짜: %s", canName, quantity, date);
-            updateTable(clientName, logMessage);
-            // 추가 처리 로직
-        }
-
-        public void sendMessage(String message) {
-            out.println(message);
-        }
     }
 }
