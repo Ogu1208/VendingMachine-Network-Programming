@@ -1,10 +1,10 @@
 package server;
 
 import Can.Can;
+import Can.CanArray;
+import util.SalesData;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +21,8 @@ public class VendingMachineData {
     }
 
     public void addSale(String canName, int quantity, String date) {
+        int canPrice = getCanPrice(canName);
+
         // 재고 감소
         inventory.put(canName, inventory.getOrDefault(canName, 10) - quantity);
 
@@ -41,5 +43,36 @@ public class VendingMachineData {
 
     public void updateInventory(String canName, int quantity) {
         inventory.put(canName, quantity);
+    }
+
+    public List<SalesData> getDailySalesList() {
+        List<SalesData> dailySalesList = new ArrayList<>();
+        for (Map.Entry<String, Map<String, Integer>> entry : dailySales.entrySet()) {
+            String date = entry.getKey();
+            for (Map.Entry<String, Integer> sale : entry.getValue().entrySet()) {
+                dailySalesList.add(new SalesData(sale.getKey(), sale.getValue(), getCanPrice(sale.getKey()), date));
+            }
+        }
+        return dailySalesList;
+    }
+
+    public List<SalesData> getMonthlySalesList() {
+        List<SalesData> monthlySalesList = new ArrayList<>();
+        for (Map.Entry<String, Map<String, Integer>> entry : monthlySales.entrySet()) {
+            String month = entry.getKey();
+            for (Map.Entry<String, Integer> sale : entry.getValue().entrySet()) {
+                monthlySalesList.add(new SalesData(sale.getKey(), sale.getValue(), getCanPrice(sale.getKey()), month));
+            }
+        }
+        return monthlySalesList;
+    }
+
+    private int getCanPrice(String canName) {
+        for (Can can : CanArray.canList) {
+            if (can.getCanName().equals(canName)) {
+                return can.getCanPrice();
+            }
+        }
+        return 0; // 가격을 찾을 수 없는 경우 기본값 반환
     }
 }

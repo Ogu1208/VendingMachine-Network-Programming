@@ -1,6 +1,7 @@
 package server;
 
 import Can.CanArray;
+import util.SalesData;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -85,11 +86,8 @@ public class ServerMain extends JFrame {
         DefaultTableModel dailySalesModel = new DefaultTableModel(dailySalesColumns, 0);
         JTable dailySalesTable = new JTable(dailySalesModel);
 
-        for (String date : data.dailySales.keySet()) {
-            for (String canName : data.dailySales.get(date).keySet()) {
-                int quantity = data.dailySales.get(date).get(canName);
-                dailySalesModel.addRow(new Object[]{date, canName, quantity});
-            }
+        for (SalesData salesData : data.getDailySalesList()) {
+            dailySalesModel.addRow(new Object[]{salesData.getDate(), salesData.getCanName(), salesData.getQuantitySold()});
         }
         tabbedPane.addTab("일별 매출", new JScrollPane(dailySalesTable));
 
@@ -98,11 +96,8 @@ public class ServerMain extends JFrame {
         DefaultTableModel monthlySalesModel = new DefaultTableModel(monthlySalesColumns, 0);
         JTable monthlySalesTable = new JTable(monthlySalesModel);
 
-        for (String month : data.monthlySales.keySet()) {
-            for (String canName : data.monthlySales.get(month).keySet()) {
-                int quantity = data.monthlySales.get(month).get(canName);
-                monthlySalesModel.addRow(new Object[]{month, canName, quantity});
-            }
+        for (SalesData salesData : data.getMonthlySalesList()) {
+            monthlySalesModel.addRow(new Object[]{salesData.getDate().substring(0, 7), salesData.getCanName(), salesData.getQuantitySold()});
         }
         tabbedPane.addTab("월별 매출", new JScrollPane(monthlySalesTable));
 

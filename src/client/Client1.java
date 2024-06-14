@@ -50,6 +50,21 @@ public class Client1 extends JFrame implements ClientInterface {
         sendRequest("INVENTORY_UPDATE:" + canName + ":" + quantity);
     }
 
+    @Override
+    public void requestInventory() {
+        sendRequest("GET_INVENTORY");
+    }
+
+    @Override
+    public void requestDailySales() {
+        sendRequest("GET_DAILY_SALES");
+    }
+
+    @Override
+    public void requestMonthlySales() {
+        sendRequest("GET_MONTHLY_SALES");
+    }
+
     private void sendRequest(String request) {
         try {
             out.writeObject(request);

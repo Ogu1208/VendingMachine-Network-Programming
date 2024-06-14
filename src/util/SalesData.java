@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class SalesData implements Serializable, Comparable<SalesData>{
+public class SalesData implements Serializable, Comparable<SalesData> {
     private static final long serialVersionUID = 1L;
     private String canName;
     private int quantitySold;

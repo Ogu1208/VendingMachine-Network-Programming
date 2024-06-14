@@ -32,14 +32,38 @@ public class Client2 extends JFrame implements ClientInterface {
 
             sendRequest("REGISTER:Client2");
 
-            // 서버로 데이터 전송 예시
-            sendRequest("GET_STATUS");
+            // 서버로 초기 재고 현황 전송
+            sendInitialInventory();
 
         } catch (IOException e) {
             log("서버 연결 오류: " + e.getMessage());
         }
     }
 
+    @Override
+    public void sendSale(String canName, int quantity) {
+        sendRequest("SALE:" + canName + ":" + quantity);
+    }
+
+    @Override
+    public void sendInventoryUpdate(String canName, int quantity) {
+        sendRequest("INVENTORY_UPDATE:" + canName + ":" + quantity);
+    }
+
+    @Override
+    public void requestInventory() {
+        sendRequest("REQUEST_INVENTORY");
+    }
+
+    @Override
+    public void requestDailySales() {
+        sendRequest("REQUEST_DAILY_SALES");
+    }
+
+    @Override
+    public void requestMonthlySales() {
+        sendRequest("REQUEST_MONTHLY_SALES");
+    }
 
     private void sendRequest(String request) {
         try {
@@ -55,23 +79,21 @@ public class Client2 extends JFrame implements ClientInterface {
         }
     }
 
+    private void sendInitialInventory() {
+        String[] cans = {"물", "커피", "이온음료", "고급커피", "탄산음료", "특화음료"};
+        for (String can : cans) {
+            sendInventoryUpdate(can, 10);
+        }
+    }
+
     private void log(String message) {
         SwingUtilities.invokeLater(() -> logArea.append(message + "\n"));
     }
 
-    @Override
-    public void sendSale(String canName, int quantity) {
-        sendRequest("SALE:" + canName + ":" + quantity);
-    }
-
-    @Override
-    public void sendInventoryUpdate(String canName, int quantity) {
-        sendRequest("INVENTORY_UPDATE:" + canName + ":" + quantity);
-    }
-
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new MachineFrame("Ogu1208!", new Client2());
+            Client2 client = new Client2();
+            new MachineFrame("Ogu1208!", client);
         });
     }
 }

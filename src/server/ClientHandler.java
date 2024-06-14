@@ -1,6 +1,8 @@
 package server;
 
+import Can.Can;
 import Can.CanArray;
+import util.SalesData;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -9,6 +11,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class ClientHandler extends Thread {
     private Socket socket;
