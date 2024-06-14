@@ -251,8 +251,7 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 				}
 
 				panelLeft.updateCanLabels();
-				panelLeft.updateCanButtons();
-				panelLeft.updateButtonColors();
+//				panelLeft.updateButtonColors(panelLeft.getCurrentMoney());
 			}
 		});
 
@@ -304,13 +303,29 @@ public class MachinePanelRight extends JPanel implements ActionListener {
 		}
 	}
 
-	public static void updateCanTable() {
+	public void updateCoinInventory(int amount) {
+		for (Coin coin : CoinArray.coinList) {
+			if (coin.getCoinName().equals(String.valueOf(amount))) {
+				coin.setCoinNum(coin.getCoinNum() + 1);
+				updateMoneyTable();
+				updateTotalBalanceLabel();
+				break;
+			}
+		}
+	}
+
+	public void updateCanTable() {
 		DefaultTableModel canModel = (DefaultTableModel) canTable.getModel();
 		canModel.setRowCount(0);
 		for (Can can : CanArray.canList) {
 			String[] row = {can.getCanName(), String.valueOf(can.getCanNum()), String.valueOf(can.getCanPrice())};
 			canModel.addRow(row);
 		}
+	}
+
+	public void updateTotalBalance(int amount) {
+		Admin.setTotalMoney(Admin.getTotalMoney() + amount);
+		totalMoneyLabel.setText("ÃÑ ¸ÅÃâ¾× : " + Admin.getTotalMoney());
 	}
 
 	private void showSalesReport() {

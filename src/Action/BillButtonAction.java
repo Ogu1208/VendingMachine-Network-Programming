@@ -15,16 +15,17 @@ import java.util.List;
 
 public class BillButtonAction implements ActionListener {
 
-
     int billValue;
     JTextField takeMoneytext;
     List<JButton> blist;
+    MachinePanelRight panelRight;
     private static int totalBillAmount = 0;
 
-    public BillButtonAction(int billValue, JTextField takeMoneytext, List<JButton> blist) {
+    public BillButtonAction(int billValue, JTextField takeMoneytext, List<JButton> blist, MachinePanelRight panelRight) {
         this.billValue = billValue;
         this.takeMoneytext = takeMoneytext;
         this.blist = blist;
+        this.panelRight = panelRight;
     }
 
     @Override

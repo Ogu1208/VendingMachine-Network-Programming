@@ -18,11 +18,13 @@ public class CoinButtonAction implements ActionListener {
     int coinValue;
     JTextField takeMoneytext;
     List<JButton> blist;
+    MachinePanelRight panelRight;
 
-    public CoinButtonAction(int coinValue, JTextField takeMoneytext, List<JButton> blist) {
+    public CoinButtonAction(int coinValue, JTextField takeMoneytext, List<JButton> blist, MachinePanelRight panelRight) {
         this.coinValue = coinValue;
         this.takeMoneytext = takeMoneytext;
         this.blist = blist;
+        this.panelRight = panelRight;
     }
 
     @Override
