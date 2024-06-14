@@ -4,18 +4,17 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import Action.*;
+import Can.Can;
 import Can.CanArray;
+import client.ClientInterface;
+import util.SalesData;
 import util.SalesManager;
 
 public class MachinePanelLeft extends JPanel {
@@ -25,9 +24,11 @@ public class MachinePanelLeft extends JPanel {
 	List<JButton> blist;
 	List<JLabel> canLabels;
 	SalesManager salesManager;
+	ClientInterface client;
 
-	public MachinePanelLeft(SalesManager salesManager) {
+	public MachinePanelLeft(SalesManager salesManager, ClientInterface client) {
 		this.salesManager = salesManager;
+		this.client = client;
 
 		// 좌측 자판기 판넬
 		setPreferredSize(new Dimension(320, 630));
@@ -86,7 +87,23 @@ public class MachinePanelLeft extends JPanel {
 			JLabel canLabel = new JLabel(CanArray.canList.get(i).getCanPrice() + "원");
 			canLabels.add(canLabel); // 라벨 리스트에 추가
 			canButton = new JButton(CanArray.canList.get(i).getCanName());
-			canButton.addActionListener(new ButtonAction(takeMoneytext, getCan, blist, salesManager));
+			int index = i; // 변수 캡쳐
+			canButton.addActionListener(new ButtonAction(takeMoneytext, getCan, blist, salesManager) {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					int currentMoney = Integer.parseInt(takeMoneytext.getText());
+					Can can = CanArray.canList.get(index);
+					if (currentMoney >= can.getCanPrice()) {
+						int quantity = 1; // 예시로 1개 판매
+						can.setCanNum(can.getCanNum() - quantity);
+						salesManager.addSales(new SalesData(can.getCanName(), quantity, can.getCanPrice()));
+						client.sendSale(can.getCanName(), quantity);
+						takeMoneytext.setText(String.valueOf(currentMoney - can.getCanPrice()));
+					} else {
+						JOptionPane.showMessageDialog(null, "투입된 돈이 부족합니다.");
+					}
+				}
+			});
 			canButton.setForeground(new Color(0, 0, 0));  // 음료 텍스트 색상
 			canButton.setBackground(new Color(255, 255, 255));  // 음료 버튼 색상
 			canEach.add(new JLabel(new ImageIcon(i + ".png")));  // 음료 이미지
