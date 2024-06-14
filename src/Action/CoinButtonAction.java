@@ -3,6 +3,7 @@ package Action;
 import Can.CanArray;
 import Coin.CoinArray;
 import Coin.Coin;
+import Machine.MachinePanelLeft;
 import Machine.MachinePanelRight;
 import Person.Admin;
 
@@ -19,18 +20,25 @@ public class CoinButtonAction implements ActionListener {
     JTextField takeMoneytext;
     List<JButton> blist;
     MachinePanelRight panelRight;
+    MachinePanelLeft panelLeft;
 
-    public CoinButtonAction(int coinValue, JTextField takeMoneytext, List<JButton> blist, MachinePanelRight panelRight) {
+    public CoinButtonAction(int coinValue, JTextField takeMoneytext, List<JButton> blist, MachinePanelRight panelRight, MachinePanelLeft panelLeft) {
         this.coinValue = coinValue;
         this.takeMoneytext = takeMoneytext;
         this.blist = blist;
         this.panelRight = panelRight;
+        this.panelLeft = panelLeft;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         int currentMoney = Integer.parseInt(takeMoneytext.getText());
+        if (panelLeft.getTotalInsertedMoney() + coinValue > 7000) {
+            JOptionPane.showMessageDialog(null, "총 투입 금액이 7000원을 초과할 수 없습니다.");
+            return;
+        }
         currentMoney += coinValue;
+        panelLeft.addInsertedMoney(coinValue);
         takeMoneytext.setText(String.valueOf(currentMoney));
 
         // Update total money
@@ -45,7 +53,7 @@ public class CoinButtonAction implements ActionListener {
         updateCoinTable();
         MachinePanelRight.updateTotalBalanceLabel();
 
-        updateButtonColors(currentMoney);
+        panelLeft.updateButtonColors(currentMoney);
     }
 
     private void addCoinToCoinArray(int coinValue) {
@@ -63,25 +71,6 @@ public class CoinButtonAction implements ActionListener {
         for (Coin coin : CoinArray.coinList) {
             String[] row = {coin.getCoinName(), String.valueOf(coin.getCoinNum())};
             moneyModel.addRow(row);
-        }
-    }
-
-    private void updateButtonColors(int currentMoney) {
-        for (int i = 0; i < blist.size(); i++) {
-            JButton button = blist.get(i);
-            int canPrice = CanArray.canList.get(i).getCanPrice();
-            int canNum = CanArray.canList.get(i).getCanNum();
-
-            if (canNum == 0) {
-                button.setForeground(new Color(255, 255, 255));
-                button.setBackground(new Color(204, 61, 61)); // 빨간색
-            } else if (canPrice <= currentMoney) {
-                button.setForeground(new Color(255, 255, 255));
-                button.setBackground(new Color(20, 175, 100)); // 초록색
-            } else {
-                button.setForeground(new Color(0, 0, 0));
-                button.setBackground(new Color(255, 255, 255)); // 흰색
-            }
         }
     }
 }

@@ -26,6 +26,7 @@ public class MachinePanelLeft extends JPanel {
 	List<JLabel> canLabels;
 	private int currentMoney = 0;
 	private int billCount = 0;
+	private int totalInsertedMoney = 0;  // 동전과 지폐의 총 합계 금액을 저장
 	private MachinePanelRight panelRight;
 	private SalesManager salesManager;
 	private ClientInterface client;
@@ -121,7 +122,7 @@ public class MachinePanelLeft extends JPanel {
 
 		for (int value : coinValues) {
 			JButton button = new JButton(value + "원");
-			button.addActionListener(new CoinButtonAction(value, takeMoneytext, blist, panelRight));
+			button.addActionListener(new CoinButtonAction(value, takeMoneytext, blist, panelRight, this));
 			buttons.add(button);
 		}
 
@@ -134,7 +135,7 @@ public class MachinePanelLeft extends JPanel {
 
 		for (int value : billValues) {
 			JButton button = new JButton(value + "원");
-			button.addActionListener(new BillButtonAction(value, takeMoneytext, blist, panelRight));
+			button.addActionListener(new BillButtonAction(value, takeMoneytext, blist, panelRight, this));
 			buttons.add(button);
 		}
 
@@ -149,12 +150,43 @@ public class MachinePanelLeft extends JPanel {
 		}
 	}
 
-	public void updateCanButton() {
+	public void updateCanButtons() {
 		for (int i = 0; i < blist.size(); i++) {
 			JButton button = blist.get(i);
 			String canName = CanArray.canList.get(i).getCanName();
 			button.setText(canName);
 		}
+	}
+
+	public void updateButtonColors(int currentMoney) {
+		for (int i = 0; i < blist.size(); i++) {
+			JButton button = blist.get(i);
+			int canPrice = CanArray.canList.get(i).getCanPrice();
+			int canNum = CanArray.canList.get(i).getCanNum();
+
+			if (canNum == 0) {
+				button.setForeground(new Color(255, 255, 255));
+				button.setBackground(new Color(204, 61, 61)); // 빨간색
+			} else if (canPrice <= currentMoney) {
+				button.setForeground(new Color(255, 255, 255));
+				button.setBackground(new Color(20, 175, 100)); // 초록색
+			} else {
+				button.setForeground(new Color(0, 0, 0));
+				button.setBackground(new Color(255, 255, 255)); // 흰색
+			}
+		}
+	}
+
+	public int getTotalInsertedMoney() {
+		return totalInsertedMoney;
+	}
+
+	public void addInsertedMoney(int amount) {
+		totalInsertedMoney += amount;
+	}
+
+	public void resetInsertedMoney() {
+		totalInsertedMoney = 0;
 	}
 
 	public int getCurrentMoney() {

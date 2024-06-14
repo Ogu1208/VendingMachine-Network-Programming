@@ -3,6 +3,7 @@ package Action;
 import Can.CanArray;
 import Coin.Coin;
 import Coin.CoinArray;
+import Machine.MachinePanelLeft;
 import Machine.MachinePanelRight;
 import Person.Admin;
 
@@ -19,13 +20,15 @@ public class BillButtonAction implements ActionListener {
     JTextField takeMoneytext;
     List<JButton> blist;
     MachinePanelRight panelRight;
+    MachinePanelLeft panelLeft;
     private static int totalBillAmount = 0;
 
-    public BillButtonAction(int billValue, JTextField takeMoneytext, List<JButton> blist, MachinePanelRight panelRight) {
+    public BillButtonAction(int billValue, JTextField takeMoneytext, List<JButton> blist, MachinePanelRight panelRight, MachinePanelLeft panelLeft) {
         this.billValue = billValue;
         this.takeMoneytext = takeMoneytext;
         this.blist = blist;
         this.panelRight = panelRight;
+        this.panelLeft = panelLeft;
     }
 
     @Override
@@ -34,10 +37,15 @@ public class BillButtonAction implements ActionListener {
             JOptionPane.showMessageDialog(null, "지폐로 투입할 수 있는 최대 금액은 5000원입니다.");
             return;
         }
+        if (panelLeft.getTotalInsertedMoney() + billValue > 7000) {
+            JOptionPane.showMessageDialog(null, "총 투입 금액이 7000원을 초과할 수 없습니다.");
+            return;
+        }
 
         int currentMoney = Integer.parseInt(takeMoneytext.getText());
         currentMoney += billValue;
         totalBillAmount += billValue;
+        panelLeft.addInsertedMoney(billValue);
         takeMoneytext.setText(String.valueOf(currentMoney));
 
         // Update total money
@@ -52,7 +60,7 @@ public class BillButtonAction implements ActionListener {
         updateCoinTable();
         MachinePanelRight.updateTotalBalanceLabel();
 
-        updateButtonColors(currentMoney);
+        panelLeft.updateButtonColors(currentMoney);
     }
 
     private void addCoinToCoinArray(int billValue) {
@@ -70,25 +78,6 @@ public class BillButtonAction implements ActionListener {
         for (Coin coin : CoinArray.coinList) {
             String[] row = {coin.getCoinName(), String.valueOf(coin.getCoinNum())};
             moneyModel.addRow(row);
-        }
-    }
-
-    private void updateButtonColors(int currentMoney) {
-        for (int i = 0; i < blist.size(); i++) {
-            JButton button = blist.get(i);
-            int canPrice = CanArray.canList.get(i).getCanPrice();
-            int canNum = CanArray.canList.get(i).getCanNum();
-
-            if (canNum == 0) {
-                button.setForeground(new Color(255, 255, 255));
-                button.setBackground(new Color(204, 61, 61)); // 빨간색
-            } else if (canPrice <= currentMoney) {
-                button.setForeground(new Color(255, 255, 255));
-                button.setBackground(new Color(20, 175, 100)); // 초록색
-            } else {
-                button.setForeground(new Color(0, 0, 0));
-                button.setBackground(new Color(255, 255, 255)); // 흰색
-            }
         }
     }
 

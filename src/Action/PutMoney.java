@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 
 import Can.CanArray;
+import Machine.MachinePanelLeft;
 import Machine.MachinePanelRight;
 import Person.Admin;
 
@@ -20,13 +21,15 @@ public class PutMoney implements ActionListener {
 
 	JTextField putMoneytext, takeMoneytext;
 	List<JButton> blist;
+	MachinePanelLeft panelLeft;
 
 	// 금액 투입 클래스 생성자
-	public PutMoney(JTextField putMoneytext, JTextField takeMoneytext, List<JButton> blist) {
+	public PutMoney(JTextField putMoneytext, JTextField takeMoneytext, List<JButton> blist, MachinePanelLeft panelLeft) {
 		super();
 		this.putMoneytext = putMoneytext;
 		this.takeMoneytext = takeMoneytext;
 		this.blist = blist;
+		this.panelLeft = panelLeft;
 	}
 
 	@Override
@@ -52,6 +55,10 @@ public class PutMoney implements ActionListener {
 				JOptionPane.showMessageDialog(new JFrame(), "5000원 이하로 투입할 수 있습니다.");
 			} else {
 				int currentMoney = Integer.parseInt(putMoneytext.getText());
+				if (panelLeft.getTotalInsertedMoney() + currentMoney > 7000) {
+					JOptionPane.showMessageDialog(new JFrame(), "총 투입 금액이 7000원을 초과할 수 없습니다.");
+					return;
+				}
 				int totalMoney = Admin.getTotalMoney() + currentMoney;
 				Admin.setTotalMoney(totalMoney);
 				MachinePanelRight.totalMoneyLabel.setText("총 매출액 : " + totalMoney);
@@ -60,6 +67,7 @@ public class PutMoney implements ActionListener {
 				takeMoneytext.setText(String.valueOf(newTotal));
 				putMoneytext.setText("");
 
+				panelLeft.addInsertedMoney(currentMoney);
 				updateButtonColors(newTotal);
 			}
 		} else {
