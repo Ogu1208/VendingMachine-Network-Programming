@@ -1,6 +1,6 @@
 **4학년 2학기 네트워크 프로그래밍**
 
-[자판기관리프로그램_보고서(설계서 포함).pdf](https://prod-files-secure.s3.us-west-2.amazonaws.com/a1b66f85-a0eb-4149-b91f-458ea42172a3/fc9dc737-5ded-43e3-a773-ea00875e7162/%EC%9E%90%ED%8C%90%EA%B8%B0%EA%B4%80%EB%A6%AC%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%A8_%EB%B3%B4%EA%B3%A0%EC%84%9C(%EC%84%A4%EA%B3%84%EC%84%9C_%ED%8F%AC%ED%95%A8).pdf)
+[자판기관리프로그램_보고서(설계서 포함).pdf](https://github.com/Ogu1208/VendingMachine-Network-Programming/blob/main/%EC%9E%90%ED%8C%90%EA%B8%B0%EA%B4%80%EB%A6%AC%ED%94%84%EB%A1%9C%EA%B7%B8%EB%9E%A8_%EB%B3%B4%EA%B3%A0%EC%84%9C(%EC%84%A4%EA%B3%84%EC%84%9C%20%ED%8F%AC%ED%95%A8).pdf)
 
 - Java, Swing을 이용한 자판기 관리 GUI 프로그램 구현
 - 멀티스레드와 소켓 프로그래밍을 통한 클라이언트-서버 (Server, Client1, Client2) 통신 구현
